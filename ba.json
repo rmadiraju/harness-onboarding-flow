@@ -5,6 +5,12 @@
       "name": "E-commerce Platform",
       "description": "Main e-commerce application for online retail operations",
       "email": "ecommerce@company.com"
+    },
+    {
+      "id": "ba-2",
+      "name": "Payment Platform",
+      "description": "Main payment application for payment operations",
+      "email": "ecommerce@company.com"
     }
   ]
 }
