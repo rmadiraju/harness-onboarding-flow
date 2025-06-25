@@ -7,7 +7,7 @@
       componentTests: true,
       liveDependency: true,
       performance: true,
-      changeFreeze: true,
+      changeFreeze: true
     }
   },
   {
@@ -18,7 +18,7 @@
       componentTests: true,
       liveDependency: true,
       performance: true,
-      changeFreeze: false,
+      changeFreeze: false
     }
   },
   {
@@ -29,7 +29,7 @@
       componentTests: false,
       liveDependency: true,
       performance: false,
-      changeFreeze: true,
+      changeFreeze: true
     }
   },
 ]
