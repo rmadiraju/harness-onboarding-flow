@@ -8,7 +8,7 @@
       liveDependency: true,
       performance: true,
       changeFreeze: true,
-    },
+    }
   },
   {
     id: 'build-122',
@@ -19,7 +19,7 @@
       liveDependency: true,
       performance: true,
       changeFreeze: false,
-    },
+    }
   },
   {
     id: 'build-121',
@@ -30,6 +30,6 @@
       liveDependency: true,
       performance: false,
       changeFreeze: true,
-    },
+    }
   },
 ]
