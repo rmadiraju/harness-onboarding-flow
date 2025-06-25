@@ -1,1 +1,23 @@
-{}
+[
+  {
+      "id": "sys-1",
+      "name": "E-commerce Platform",
+      "description": "Main e-commerce system for online retail operations with product catalog, shopping cart, and order management",
+      "owner": "E-commerce Team",
+      "type": "Web Application"
+    },
+    {
+      "id": "sys-2",
+      "name": "Payment Gateway",
+      "description": "Secure payment processing system supporting multiple payment methods including credit cards, digital wallets, and bank transfers",
+      "owner": "Payment Team",
+      "type": "API Service"
+    },
+    {
+      "id": "sys-3",
+      "name": "Customer Portal",
+      "description": "Customer self-service portal for account management, order tracking, and support ticket creation",
+      "owner": "Customer Success Team",
+      "type": "Web Application"
+    }
+  ]
