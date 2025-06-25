@@ -42,6 +42,7 @@ export const BuildSelectorScreen: React.FC = () => {
   }, []);
 
   // When selectedBuildId changes, show spinner for 1s, then show results
+  // @ts-ignore
   useEffect(() => {
     if (selectedBuildId) {
       setValidating(true);

@@ -21,9 +21,7 @@ interface ReleaseSubmitDialogProps {
 }
 
 export const ReleaseSubmitDialog: React.FC<ReleaseSubmitDialogProps> = ({
-  open,
   onClose,
-  build,
   failedValidations,
 }) => {
   const [releaseNotes, setReleaseNotes] = useState('');
