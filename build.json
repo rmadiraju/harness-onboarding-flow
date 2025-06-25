@@ -1,0 +1,35 @@
+[
+  {
+    id: 'build-123',
+    label: 'Build 1.2.4 (2024-06-15)',
+    validations: {
+      vulnerabilities: true,
+      componentTests: true,
+      liveDependency: true,
+      performance: true,
+      changeFreeze: true,
+    },
+  },
+  {
+    id: 'build-122',
+    label: 'Build 1.2.3 (2024-06-10)',
+    validations: {
+      vulnerabilities: false,
+      componentTests: true,
+      liveDependency: true,
+      performance: true,
+      changeFreeze: false,
+    },
+  },
+  {
+    id: 'build-121',
+    label: 'Build 1.2.2 (2024-05-15)',
+    validations: {
+      vulnerabilities: true,
+      componentTests: false,
+      liveDependency: true,
+      performance: false,
+      changeFreeze: true,
+    },
+  },
+]
