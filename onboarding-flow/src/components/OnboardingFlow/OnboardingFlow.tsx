@@ -14,6 +14,10 @@ import { BusinessApplicationDetails } from './BusinessApplicationDetails';
 import { SystemSelection } from './SystemSelection';
 import { ComponentCreation } from './ComponentCreation';
 import { ReviewAndSubmit } from './ReviewAndSubmit';
+import { BusinessApplicationView } from './BusinessApplicationView';
+import { SystemView } from './SystemView';
+import { ComponentView } from './ComponentView';
+import { OnboardingApi } from '../../api/onboardingApi';
 
 // const steps: OnboardingStep[] = [
 //   {
@@ -61,6 +65,39 @@ export const OnboardingFlow = () => {
   const [onboardingData, setOnboardingData] = useState<OnboardingData>({});
   const [completedSteps, setCompletedSteps] = useState<Set<number>>(new Set());
 
+  // View navigation state
+  const [viewBA, setViewBA] = useState<null | { ba: any; systems: any[] }>(null);
+  const [viewSystem, setViewSystem] = useState<null | { system: any; components: any[] }>(null);
+  const [viewComponent, setViewComponent] = useState<null | { component: any }>(null);
+
+  // Data cache for systems/components
+  const [allSystems, setAllSystems] = useState<any[]>([]);
+  const [allComponents, setAllComponents] = useState<any[]>([]);
+
+  React.useEffect(() => {
+    // Fetch all systems and components on mount (simulate API for now)
+    (async () => {
+      const systems = await OnboardingApi.fetchSystems();
+      setAllSystems(systems);
+      // For demo, create some sample components for each system
+      const sampleComponents = systems.flatMap((sys: any, idx: number) => [
+        {
+          name: `UI` as const,
+          type: 'ui' as const,
+          language: 'js' as const,
+          systemId: sys.id,
+        },
+        {
+          name: `API` as const,
+          type: 'microservice' as const,
+          language: 'go' as const,
+          systemId: sys.id,
+        },
+      ]);
+      setAllComponents(sampleComponents);
+    })();
+  }, []);
+
   const handleNext = () => {
     setActiveStep((prevActiveStep) => prevActiveStep + 1);
     setCompletedSteps(prev => new Set([...prev, activeStep]));
@@ -80,6 +117,34 @@ export const OnboardingFlow = () => {
     setOnboardingData(prev => ({ ...prev, ...data }));
   };
 
+  const handleViewBADetails = (ba: any) => {
+    const systems = allSystems.filter(s => s.businessApplicationId === ba.id);
+    setViewBA({ ba, systems });
+  };
+  const handleViewSystem = (system: any) => {
+    const components = allComponents.filter(c => c.systemId === system.id);
+    setViewSystem({ system, components });
+  };
+  const handleViewComponent = (component: any) => {
+    setViewComponent({ component });
+  };
+
+  // Back navigation handlers
+  const handleBackFromComponent = () => setViewComponent(null);
+  const handleBackFromSystem = () => setViewSystem(null);
+  const handleBackFromBA = () => setViewBA(null);
+
+  // Render view navigation if set
+  if (viewComponent) {
+    return <ComponentView component={viewComponent.component} onBack={handleBackFromComponent} />;
+  }
+  if (viewSystem) {
+    return <SystemView system={viewSystem.system} components={viewSystem.components} onComponentClick={handleViewComponent} onBack={handleBackFromSystem} />;
+  }
+  if (viewBA) {
+    return <BusinessApplicationView businessApplication={viewBA.ba} systems={viewBA.systems} onSystemClick={handleViewSystem} onBack={handleBackFromBA} />;
+  }
+
   const renderStepContent = (stepIndex: number) => {
     switch (stepIndex) {
       case 0:
@@ -89,6 +154,7 @@ export const OnboardingFlow = () => {
               updateOnboardingData({ selectedBA: ba });
               handleNext();
             }}
+            onViewBADetails={handleViewBADetails}
           />
         );
       case 1:

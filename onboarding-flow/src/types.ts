@@ -3,6 +3,7 @@ export interface BusinessApplication {
   name: string;
   description: string;
   email: string;
+  onboarded?: boolean;
 }
 
 export interface System {
@@ -11,12 +12,16 @@ export interface System {
   description: string;
   owner: string;
   type: string;
+  businessApplicationId: string;
 }
 
 export interface Component {
-  name: string;
-  type: 'microservice' | 'stream' | 'ui';
+  name: 'UI' | 'Microservice/API' | 'Database' | 'Stream';
+  type: 'microservice' | 'stream' | 'ui' | 'database';
   language: 'java' | 'go' | 'js';
+  generateCode?: boolean;
+  jiraStoryLink?: string;
+  systemId: string;
 }
 
 export interface OnboardingData {
