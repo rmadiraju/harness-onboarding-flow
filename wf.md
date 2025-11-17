@@ -101,34 +101,26 @@ A Workflow Definition describes **what steps to execute** and **their dependenci
 }
 ```
 
-2.2 Workflow Step
+### 2.2 Workflow Step
 
 Represents a node in the workflow DAG.
 
 2.2.1 Fields
-	•	id (string, required)
-Step identifier, unique within the workflow.
-	•	type (string, required)
-One of:
-	•	"PIPELINE" – external pipeline (Harness/IDP).
-	•	"SERVICE_CALL" – synchronous call to internal service.
-	•	"SUB_WORKFLOW" – (optional) nested workflow.
-	•	pipelineKey (string, required for PIPELINE)
-Logical key that maps to a Harness pipeline.
-	•	service (string, required for SERVICE_CALL)
-Logical service name.
-	•	dependsOn (array of string, optional, default: [])
-List of step IDs that must complete successfully before this step can start.
-	•	runInParallelGroup (string, optional)
-Tag to group steps that can run in parallel (for debugging/metrics).
-	•	condition (string, optional)
-Expression over onboarding context determining if step should run.
-	•	inputMapping (object, optional)
-Mapping from onboarding context to pipeline/service inputs (e.g., JsonPath).
-	•	retryPolicy (object, optional)
-Simple structure, e.g., {"maxAttempts": 3, "backoffSeconds": 60}.
-	•	timeoutSeconds (integer, optional)
-Max allowed runtime before marking as timed-out.
+-	id (string, required): Step identifier, unique within the workflow.
+-	type (string, required): Logical key that maps to a Harness pipeline.
+	- One of:
+		-	"PIPELINE" – external pipeline (Harness/IDP).
+		-	"SERVICE_CALL" – synchronous call to internal service.
+		-	"SUB_WORKFLOW" – (optional) nested workflow.
+		-	pipelineKey (string, required for PIPELINE)
+
+-	service (string, required for SERVICE_CALL): Logical service name.
+-	dependsOn (array of string, optional, default: []): List of step IDs that must complete successfully before this step can start.
+-	runInParallelGroup (string, optional): Tag to group steps that can run in parallel (for debugging/metrics).
+-	condition (string, optional): Expression over onboarding context determining if step should run.
+-	inputMapping (object, optional): Mapping from onboarding context to pipeline/service inputs (e.g., JsonPath).
+-	retryPolicy (object, optional): Simple structure, e.g., {"maxAttempts": 3, "backoffSeconds": 60}.
+-	timeoutSeconds (integer, optional): Max allowed runtime before marking as timed-out.
 
 ### 2.2.2 Sample Step
 ```json
@@ -152,16 +144,13 @@ Max allowed runtime before marking as timed-out.
 Represents one onboarding run.
 
 3.1.1 Fields
-	•	id (string, required)
-Unique ID; also used as correlationId in events.
-	•	workflowId (string, required)
-Reference to WorkflowDefinition.workflowId.
-	•	workflowVersion (integer, required)
-	•	status (string, required)
-One of: PENDING, RUNNING, COMPLETED, FAILED, CANCELLED.
-	•	createdAt / updatedAt (timestamps, required)
-	•	context (object, required)
-Onboarding input and shared data (app metadata, env, user selections).
+- id (string, required): Unique ID; also used as correlationId in events.
+- workflowId (string, required): Reference to WorkflowDefinition.workflowId.
+- workflowVersion (integer, required)
+- status (string, required): Onboarding input and shared data (app metadata, env, user selections).
+	- One of: PENDING, RUNNING, COMPLETED, FAILED, CANCELLED.
+		- createdAt / updatedAt (timestamps, required)
+		- context (object, required)
 
 3.1.2 Sample
 ```json
@@ -311,11 +300,11 @@ Example
 Meta.type: idp.pipeline.cancel
 
 Fields (data object)
-	•	command (string, required) – constant "CANCEL_PIPELINE".
-	•	pipelineKey (string, required).
-	•	onboardingId (string, required).
-	•	stepInstanceId (string, required).
-	•	externalExecutionId (string, optional) – if already started.
+- command (string, required) – constant "CANCEL_PIPELINE".
+- pipelineKey (string, required).
+- onboardingId (string, required).
+- stepInstanceId (string, required).
+- externalExecutionId (string, optional) – if already started.
 
 Example
 
@@ -348,12 +337,12 @@ All emitted on a topic such as idp.events.pipeline.
 Meta.type: idp.pipeline.started
 
 Fields (data object)
-	•	pipelineKey (string, required).
-	•	executionId (string, required).
-	•	onboardingId (string, optional but recommended).
-	•	stepInstanceId (string, optional but recommended).
-	•	status (string, required) – usually "RUNNING".
-	•	additionalInfo (object, optional).
+- pipelineKey (string, required).
+- executionId (string, required).
+- onboardingId (string, optional but recommended).
+- stepInstanceId (string, optional but recommended).
+- status (string, required) – usually "RUNNING".
+- additionalInfo (object, optional).
 
 Example
 
@@ -382,12 +371,12 @@ Example
 Meta.type: idp.pipeline.completed
 
 Fields (data object)
-	•	pipelineKey (string, required).
-	•	executionId (string, required).
-	•	onboardingId (string, optional).
-	•	stepInstanceId (string, optional).
-	•	status (string, required) – "SUCCEEDED" or "FAILED" (but usually success here).
-	•	outputs (object, optional) – result payload.
+- pipelineKey (string, required).
+- executionId (string, required).
+- onboardingId (string, optional).
+- stepInstanceId (string, optional).
+- status (string, required) – "SUCCEEDED" or "FAILED" (but usually success here).
+- outputs (object, optional) – result payload.
 
 Example
 
@@ -420,13 +409,13 @@ Example
 Published on a topic like idp.events.onboarding. These are consumable by Account Vending, Digital Care, reporting services, etc.
 
 Common Fields (data)
-	•	onboardingId (string, required).
-	•	workflowId (string, required).
-	•	workflowVersion (integer, required).
-	•	status (string, optional depending on event).
-	•	stepId / stepInstanceId (strings, for step-level events).
-	•	context (object, optional) – subset of onboarding context.
-	•	timestamp (string, ISO-8601, required).
+- onboardingId (string, required).
+- workflowId (string, required).
+- workflowVersion (integer, required).
+- status (string, optional depending on event).
+- stepId / stepInstanceId (strings, for step-level events).
+- context (object, optional) – subset of onboarding context.
+- timestamp (string, ISO-8601, required).
 
 ⸻
 
