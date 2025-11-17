@@ -99,6 +99,7 @@ A Workflow Definition describes **what steps to execute** and **their dependenci
     }
   ]
 }
+```
 
 2.2 Workflow Step
 
