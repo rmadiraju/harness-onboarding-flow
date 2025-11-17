@@ -1,0 +1,131 @@
+{
+  "workflowId": "application-onboarding-v1",
+  "name": "Application Onboarding",
+  "version": 1,
+  "triggers": {
+    "onboardingType": ["APP"],
+    "environment": ["prod", "non-prod"]
+  },
+  "steps": [
+    {
+      "id": "create-accounts",
+      "name": "Create cloud / infra accounts",
+      "type": "PIPELINE",
+      "pipelineKey": "harness.account.v1",
+      "dependsOn": [],
+      "runInParallelGroup": "infra",
+      "inputMapping": {
+        "appId": "$.onboarding.appId",
+        "ownerId": "$.onboarding.ownerId"
+      }
+    },
+    {
+      "id": "setup-ci",
+      "name": "Setup CI pipeline",
+      "type": "PIPELINE",
+      "pipelineKey": "harness.ci.v2",
+      "dependsOn": ["create-accounts"],
+      "runInParallelGroup": "ci-cd"
+    },
+    {
+      "id": "setup-cd",
+      "name": "Setup CD pipeline",
+      "type": "PIPELINE",
+      "pipelineKey": "harness.cd.v3",
+      "dependsOn": ["create-accounts"],
+      "runInParallelGroup": "ci-cd"
+    },
+    {
+      "id": "register-metrics",
+      "name": "Register service in observability",
+      "type": "SERVICE_CALL",
+      "service": "metrics-registry",
+      "dependsOn": ["setup-ci", "setup-cd"]
+    }
+  ]
+}
+condition, retryPolicy, timeout
+
+Onboarding Service should have tables like:
+OnboardingInstance
+id, workflowId, status (PENDING, RUNNING, COMPLETED, FAILED)
+context (JSON: app details, owner, choices from UI)
+StepInstance
+id, onboardingId, stepId, status
+externalExecutionId (Harness execution id)
+startedAt, completedAt, resultPayload, error
+
+
+The service:
+Loads the workflow definition.
+Creates OnboardingInstance and StepInstance rows.
+Periodically or reactively evaluates “which steps are now runnable”.
+
+common envelope
+{
+  "meta": {
+    "messageId": "uuid",
+    "type": "idp.pipeline.started",   // or idp.onboarding.step.completed
+    "version": 1,
+    "timestamp": "2025-11-16T01:23:45Z",
+    "source": "idp-platform.harness",
+    "tenantId": "toyota-fs",
+    "correlationId": "onb-12345",
+    "causationId": "msg-previous-uuid"
+  },
+  "data": { /* type-specific payload */ }
+}
+
+Messages are immutable; updates are new events.
+
+
+{
+  "command": "START_PIPELINE",
+  "pipelineKey": "harness.ci.v2",
+  "onboardingId": "onb-12345",
+  "stepInstanceId": "step-setup-ci",
+  "input": {
+    "appId": "app-789",
+    "ownerId": "user-456",
+    "gitRepo": "github.com/org/repo"
+  }
+}
+
+// when pipeline execution starts
+{
+  "meta": { "type": "idp.pipeline.started", "correlationId": "onb-12345", ... },
+  "data": {
+    "pipelineKey": "harness.ci.v2",
+    "executionId": "harn-exec-001",
+    "status": "RUNNING",
+    "stepInstanceId": "step-setup-ci"
+  }
+}
+
+// when completed
+{
+  "meta": { "type": "idp.pipeline.completed", "correlationId": "onb-12345", ... },
+  "data": {
+    "pipelineKey": "harness.ci.v2",
+    "executionId": "harn-exec-001",
+    "status": "SUCCEEDED",
+    "outputs": {
+      "artifactRepoUrl": "...",
+      "k8sNamespace": "..."
+    },
+    "stepInstanceId": "step-setup-ci"
+  }
+}
+
+// when failed
+{
+  "meta": { "type": "idp.pipeline.failed", "correlationId": "onb-12345", ... },
+  "data": {
+    "pipelineKey": "harness.ci.v2",
+    "executionId": "harn-exec-001",
+    "status": "FAILED",
+    "errorCode": "VALIDATION_ERROR",
+    "errorMessage": "Repo not accessible",
+    "stepInstanceId": "step-setup-ci"
+  }
+}
