@@ -129,8 +129,8 @@ Simple structure, e.g., {"maxAttempts": 3, "backoffSeconds": 60}.
 	•	timeoutSeconds (integer, optional)
 Max allowed runtime before marking as timed-out.
 
-2.2.2 Sample Step
-```
+### 2.2.2 Sample Step
+```json
 {
   "id": "setup-ci",
   "type": "PIPELINE",
@@ -144,7 +144,7 @@ Max allowed runtime before marking as timed-out.
 }
 ```
 
-3. Workflow Execution State
+## 3. Workflow Execution State
 
 3.1 OnboardingInstance
 
@@ -163,7 +163,7 @@ One of: PENDING, RUNNING, COMPLETED, FAILED, CANCELLED.
 Onboarding input and shared data (app metadata, env, user selections).
 
 3.1.2 Sample
-```
+```json
 {
   "id": "onb-12345",
   "workflowId": "application-onboarding-v1",
@@ -207,7 +207,7 @@ Contains error code / message / details.
 
 3.2.2 Sample
 
-```
+```json
 {
   "id": "step-setup-ci",
   "onboardingId": "onb-12345",
@@ -228,7 +228,7 @@ Contains error code / message / details.
 }
 ```
 
-4. Message Envelope (All Events & Commands)
+## 4. Message Envelope (All Events & Commands)
 
 All messages use a common envelope to support tracing, auditing, and schema evolution.
 
@@ -247,7 +247,7 @@ Payload defined per command/event type.
 
 4.2 Envelope Example
 
-```
+```json
 {
   "meta": {
     "messageId": "7acb1a9f-1e4e-4b9a-a1d6-6ce0a7e67058",
@@ -264,7 +264,8 @@ Payload defined per command/event type.
   }
 }
 ```
-5. Commands (Onboarding → Pipelines)
+
+## 5. Commands (Onboarding → Pipelines)
 
 All commands are published to a topic such as idp.commands.pipeline.
 
@@ -281,7 +282,7 @@ Fields (data object)
 
 Example
 
-```
+```json
 {
   "meta": {
     "messageId": "e4af3df8-5c0f-4be1-9de7-c59a4170d86d",
@@ -317,7 +318,7 @@ Fields (data object)
 
 Example
 
-```
+```json
 {
   "meta": {
     "messageId": "a11f4f9d-50b8-46ed-9fdf-b1af3d1a945a",
@@ -337,7 +338,7 @@ Example
 }
 ```
 
-6. Pipeline Events (Pipelines → Onboarding)
+## 6. Pipeline Events (Pipelines → Onboarding)
 
 All emitted on a topic such as idp.events.pipeline.
 
@@ -355,7 +356,7 @@ Fields (data object)
 
 Example
 
-```
+```json
 {
   "meta": {
     "messageId": "1cc6e996-01a4-4af8-bcc2-844347918f1d",
@@ -389,7 +390,7 @@ Fields (data object)
 
 Example
 
-```
+```json
 {
   "meta": {
     "messageId": "f933a9f1-53a7-4a3a-9743-96d21a3b3669",
@@ -413,7 +414,7 @@ Example
 }
 ```
 
-7. Onboarding Lifecycle Events (Onboarding → Other Services)
+## 7. Onboarding Lifecycle Events (Onboarding → Other Services)
 
 Published on a topic like idp.events.onboarding. These are consumable by Account Vending, Digital Care, reporting services, etc.
 
@@ -432,7 +433,7 @@ Common Fields (data)
 
 Meta.type: idp.onboarding.started
 
-```
+```json
 {
   "meta": {
     "messageId": "bfb5d85a-b47a-4713-86fe-7a5ee4c0f120",
@@ -460,7 +461,7 @@ Meta.type: idp.onboarding.started
 
 Meta.type: idp.onboarding.step.started
 
-```
+```json
 {
   "meta": {
     "messageId": "e3b9d154-4ad7-4aa4-b2b7-9e5b6d4c5a5d",
@@ -485,7 +486,7 @@ Meta.type: idp.onboarding.step.started
 
 Meta.type: idp.onboarding.step.completed
 
-```
+```json
 {
   "meta": {
     "messageId": "baa07f91-ec87-4f10-8957-9d2ad80d4030",
@@ -514,7 +515,7 @@ Meta.type: idp.onboarding.step.completed
 
 Meta.type: idp.onboarding.completed
 
-```
+```json
 {
   "meta": {
     "messageId": "f8e7a35a-2db6-4f11-91b5-2d78c515b9a7",
@@ -543,7 +544,7 @@ Meta.type: idp.onboarding.completed
 
 Meta.type: idp.onboarding.failed
 
-```
+```json
 {
   "meta": {
     "messageId": "9ab43c32-020f-4c50-9c3b-6cba9a7a0f25",
