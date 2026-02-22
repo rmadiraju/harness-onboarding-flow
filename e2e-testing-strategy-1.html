@@ -1,0 +1,1809 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>E2E Testing Strategy — Developer Platform</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=JetBrains+Mono:wght@400;500&family=Fraunces:wght@700;900&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0e1117;
+    --surface: #161b22;
+    --surface-raised: #1c2129;
+    --border: #30363d;
+    --text: #e6edf3;
+    --text-muted: #8b949e;
+    --accent: #58a6ff;
+    --accent-dim: #1f3a5f;
+    --green: #3fb950;
+    --green-dim: #1a3a2a;
+    --orange: #d29922;
+    --orange-dim: #3d2e00;
+    --red: #f85149;
+    --red-dim: #3d1418;
+    --purple: #bc8cff;
+    --purple-dim: #2d1f4e;
+    --cyan: #39d2c0;
+    --radius: 12px;
+    --font-body: 'DM Sans', sans-serif;
+    --font-display: 'Fraunces', serif;
+    --font-mono: 'JetBrains Mono', monospace;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: var(--font-body);
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.7;
+    font-size: 15px;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ── Hero ── */
+  .hero {
+    position: relative;
+    padding: 80px 40px 60px;
+    text-align: center;
+    overflow: hidden;
+    background: linear-gradient(180deg, #0d1520 0%, var(--bg) 100%);
+    border-bottom: 1px solid var(--border);
+  }
+  .hero::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -25%;
+    width: 150%;
+    height: 200%;
+    background: radial-gradient(ellipse at 50% 0%, rgba(88,166,255,0.08) 0%, transparent 60%),
+                radial-gradient(ellipse at 20% 50%, rgba(188,140,255,0.05) 0%, transparent 50%);
+    pointer-events: none;
+  }
+  .hero-badge {
+    display: inline-block;
+    padding: 6px 16px;
+    border-radius: 20px;
+    border: 1px solid var(--accent-dim);
+    color: var(--accent);
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    margin-bottom: 24px;
+    position: relative;
+  }
+  .hero h1 {
+    font-family: var(--font-display);
+    font-weight: 900;
+    font-size: clamp(2rem, 5vw, 3.2rem);
+    line-height: 1.15;
+    letter-spacing: -0.02em;
+    position: relative;
+    max-width: 700px;
+    margin: 0 auto 16px;
+  }
+  .hero p {
+    color: var(--text-muted);
+    font-size: 17px;
+    max-width: 600px;
+    margin: 0 auto;
+    position: relative;
+  }
+
+  /* ── Layout ── */
+  .container {
+    max-width: 1080px;
+    margin: 0 auto;
+    padding: 0 32px;
+  }
+
+  /* ── Table of Contents ── */
+  .toc {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 32px 36px;
+    margin: 48px auto;
+    max-width: 680px;
+  }
+  .toc h2 {
+    font-family: var(--font-display);
+    font-size: 20px;
+    margin-bottom: 20px;
+    color: var(--text);
+  }
+  .toc ol {
+    list-style: none;
+    counter-reset: toc-counter;
+  }
+  .toc ol li {
+    counter-increment: toc-counter;
+    margin-bottom: 8px;
+  }
+  .toc ol li a {
+    color: var(--text-muted);
+    text-decoration: none;
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+    transition: color 0.2s;
+    font-size: 14.5px;
+  }
+  .toc ol li a:hover { color: var(--accent); }
+  .toc ol li a::before {
+    content: counter(toc-counter, decimal-leading-zero);
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--accent);
+    flex-shrink: 0;
+    min-width: 22px;
+  }
+
+  /* ── Sections ── */
+  section { padding: 56px 0 32px; }
+  section + section { border-top: 1px solid var(--border); }
+
+  h2.section-title {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 26px;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+  h2.section-title .num {
+    font-family: var(--font-mono);
+    font-size: 13px;
+    color: var(--accent);
+    background: var(--accent-dim);
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-weight: 500;
+  }
+  h3 {
+    font-size: 18px;
+    font-weight: 700;
+    margin: 32px 0 12px;
+    color: var(--text);
+  }
+  h4 {
+    font-size: 15px;
+    font-weight: 700;
+    margin: 24px 0 8px;
+    color: var(--purple);
+  }
+  p { margin-bottom: 16px; }
+  p + ul, p + ol { margin-top: -8px; }
+
+  /* ── Diagram Blocks ── */
+  .diagram {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 28px;
+    margin: 24px 0;
+    overflow-x: auto;
+  }
+  .diagram pre {
+    font-family: var(--font-mono);
+    font-size: 12.5px;
+    line-height: 1.6;
+    color: var(--text-muted);
+    white-space: pre;
+  }
+
+  /* ── Pipeline Visual ── */
+  .pipeline-flow {
+    display: flex;
+    gap: 4px;
+    align-items: stretch;
+    overflow-x: auto;
+    padding: 24px 0;
+    margin: 16px 0;
+  }
+  .pipeline-stage {
+    flex: 1;
+    min-width: 120px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 18px 14px;
+    text-align: center;
+    position: relative;
+    transition: border-color 0.2s, transform 0.2s;
+  }
+  .pipeline-stage:hover {
+    border-color: var(--accent);
+    transform: translateY(-2px);
+  }
+  .pipeline-stage .stage-num {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--accent);
+    margin-bottom: 6px;
+    letter-spacing: 0.5px;
+  }
+  .pipeline-stage .stage-name {
+    font-weight: 700;
+    font-size: 13px;
+    margin-bottom: 4px;
+  }
+  .pipeline-stage .stage-desc {
+    font-size: 11px;
+    color: var(--text-muted);
+    line-height: 1.4;
+  }
+  .pipeline-stage + .pipeline-stage::before {
+    content: '→';
+    position: absolute;
+    left: -14px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--accent);
+    font-size: 16px;
+    font-weight: bold;
+  }
+
+  /* ── Tables ── */
+  .table-wrap {
+    overflow-x: auto;
+    margin: 16px 0 24px;
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px;
+  }
+  thead th {
+    background: var(--surface-raised);
+    padding: 12px 16px;
+    text-align: left;
+    font-weight: 600;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    color: var(--text-muted);
+    border-bottom: 1px solid var(--border);
+    white-space: nowrap;
+  }
+  tbody td {
+    padding: 11px 16px;
+    border-bottom: 1px solid var(--border);
+    vertical-align: top;
+  }
+  tbody tr:last-child td { border-bottom: none; }
+  tbody tr:hover { background: rgba(88,166,255,0.03); }
+
+  /* ── Code Blocks ── */
+  pre {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px 24px;
+    overflow-x: auto;
+    margin: 16px 0 24px;
+    position: relative;
+  }
+  pre code {
+    font-family: var(--font-mono);
+    font-size: 13px;
+    line-height: 1.65;
+    color: var(--text);
+  }
+  code {
+    font-family: var(--font-mono);
+    font-size: 13px;
+    background: var(--surface-raised);
+    padding: 2px 7px;
+    border-radius: 5px;
+    color: var(--cyan);
+  }
+  pre code { background: none; padding: 0; }
+  .lang-label {
+    position: absolute;
+    top: 8px;
+    right: 14px;
+    font-family: var(--font-mono);
+    font-size: 10px;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    opacity: 0.6;
+  }
+
+  /* ── Status Tags ── */
+  .tag {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.3px;
+  }
+  .tag-p0 { background: var(--red-dim); color: var(--red); }
+  .tag-p1 { background: var(--orange-dim); color: var(--orange); }
+  .tag-p2 { background: var(--purple-dim); color: var(--purple); }
+  .tag-pass { background: var(--green-dim); color: var(--green); }
+
+  /* ── Callout Boxes ── */
+  .callout {
+    border-radius: var(--radius);
+    padding: 20px 24px;
+    margin: 20px 0;
+    border-left: 3px solid;
+  }
+  .callout-info {
+    background: rgba(88,166,255,0.06);
+    border-left-color: var(--accent);
+  }
+  .callout-warn {
+    background: rgba(210,153,34,0.06);
+    border-left-color: var(--orange);
+  }
+  .callout-success {
+    background: rgba(63,185,80,0.06);
+    border-left-color: var(--green);
+  }
+  .callout strong {
+    display: block;
+    margin-bottom: 4px;
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  .callout p { margin-bottom: 0; font-size: 14px; }
+
+  /* ── Roadmap Timeline ── */
+  .timeline {
+    position: relative;
+    padding-left: 36px;
+    margin: 24px 0;
+  }
+  .timeline::before {
+    content: '';
+    position: absolute;
+    left: 12px;
+    top: 8px;
+    bottom: 8px;
+    width: 2px;
+    background: var(--border);
+  }
+  .timeline-item {
+    position: relative;
+    margin-bottom: 24px;
+  }
+  .timeline-item::before {
+    content: '';
+    position: absolute;
+    left: -30px;
+    top: 8px;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: var(--accent);
+    border: 2px solid var(--bg);
+  }
+  .timeline-item .phase {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--accent);
+    letter-spacing: 0.5px;
+    margin-bottom: 2px;
+  }
+  .timeline-item .phase-title {
+    font-weight: 700;
+    font-size: 15px;
+    margin-bottom: 4px;
+  }
+  .timeline-item .phase-desc {
+    color: var(--text-muted);
+    font-size: 13.5px;
+  }
+
+  /* ── Metrics Cards ── */
+  .metric-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 16px;
+    margin: 24px 0;
+  }
+  .metric-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px;
+    text-align: center;
+    transition: border-color 0.2s;
+  }
+  .metric-card:hover { border-color: var(--accent); }
+  .metric-card .metric-value {
+    font-family: var(--font-display);
+    font-size: 32px;
+    font-weight: 900;
+    color: var(--green);
+    margin-bottom: 4px;
+  }
+  .metric-card .metric-label {
+    font-size: 13px;
+    color: var(--text-muted);
+  }
+
+  /* ── Footer ── */
+  footer {
+    text-align: center;
+    padding: 48px 0;
+    color: var(--text-muted);
+    font-size: 13px;
+    border-top: 1px solid var(--border);
+    margin-top: 48px;
+  }
+
+  /* ── Print Styles ── */
+  @media print {
+    body { background: #fff; color: #111; font-size: 11pt; }
+    .hero { background: none; border-bottom: 2px solid #111; padding: 20px 0; }
+    .hero h1 { color: #111; }
+    .pipeline-stage, .metric-card, .toc, pre, .callout, .diagram {
+      border-color: #ccc;
+      background: #f9f9f9;
+    }
+    .tag-p0, .tag-p1, .tag-p2 { background: #eee; color: #333; }
+  }
+
+  @media (max-width: 768px) {
+    .pipeline-flow { flex-direction: column; }
+    .pipeline-stage + .pipeline-stage::before { content: '↓'; left: 50%; top: -14px; transform: translateX(-50%); }
+    .container { padding: 0 16px; }
+    .hero { padding: 48px 20px 40px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ════════════════════════ HERO ════════════════════════ -->
+<header class="hero">
+  <div class="hero-badge">Strategy Document</div>
+  <h1>End-to-End Testing Strategy</h1>
+  <p>Developer Platform — UI Onboarding, Resource Provisioning, Pipeline & Deployment Validation</p>
+</header>
+
+<div class="container">
+
+<!-- ════════════════════════ TOC ════════════════════════ -->
+<nav class="toc">
+  <h2>Contents</h2>
+  <ol>
+    <li><a href="#arch">System Architecture Overview</a></li>
+    <li><a href="#philosophy">Testing Philosophy & Principles</a></li>
+    <li><a href="#data">Test Data Strategy</a></li>
+    <li><a href="#pipeline">E2E Pipeline — Stage-by-Stage Breakdown</a></li>
+    <li><a href="#triggers">Pipeline Trigger Validation</a></li>
+    <li><a href="#deploy">Multi-Environment Deployment</a></li>
+    <li><a href="#day2">Day-2 Operations: Additional Services & CI/CD Validation</a></li>
+    <li><a href="#langstrategy">Language Strategy: Playwright + Python Hybrid</a></li>
+    <li><a href="#docker">Docker Containerization: Analysis & Recommendation</a></li>
+    <li><a href="#failures">Failure Handling & Debugging</a></li>
+    <li><a href="#coverage">Test Coverage Matrix</a></li>
+    <li><a href="#metrics">Success Metrics</a></li>
+    <li><a href="#tools">Tooling Summary</a></li>
+    <li><a href="#roadmap">Implementation Roadmap</a></li>
+  </ol>
+</nav>
+
+<!-- ════════════════════════ 1. ARCHITECTURE ════════════════════════ -->
+<section id="arch">
+  <h2 class="section-title"><span class="num">01</span> System Architecture Overview</h2>
+  <p>The Developer Platform enables teams to onboard via a self-service UI, which provisions a complete development environment — Git repository, CI/CD pipelines, AWS accounts, and cloud resources.</p>
+
+  <div class="diagram"><pre>
+┌──────────────────────────────────────────────────────────────────────────────┐
+│                          DEVELOPER PLATFORM                                  │
+│                                                                              │
+│  ┌────────────┐    ┌──────────────┐    ┌──────────────────────────────────┐  │
+│  │  UI App    │───▶│  Platform    │───▶│  Provisioning Engine             │  │
+│  │ (Onboard)  │    │  APIs        │    │  ┌──────────┐  ┌─────────────┐  │  │
+│  │            │    │              │    │  │ Git Repo │  │ AWS Accounts│  │  │
+│  │ · View Pg  │    │ · Onboard   │    │  │ + Hello  │  │ · RDS       │  │  │
+│  │ · Onboard  │    │ · Resources │    │  │   World  │  │ · S3        │  │  │
+│  │   Page     │    │ · Status    │    │  │          │  │ · DynamoDB  │  │  │
+│  └────────────┘    └──────────────┘    │  └──────────┘  │ · μService │  │  │
+│                                        │                └─────────────┘  │  │
+│                                        └──────────────────────────────────┘  │
+│                                                                              │
+│  ┌───────────────────────────────────────────────────────────────────────┐   │
+│  │  Harness Pipelines (Auto-generated per customer)                      │   │
+│  │  ┌──────────┐ ┌──────────┐ ┌────────┐ ┌──────────┐ ┌──────────────┐ │   │
+│  │  │PR Trigger│ │ Feature  │ │  Main  │ │ Release  │ │ Release      │ │   │
+│  │  │  Build   │ │ Branch   │ │ Build  │ │  to STG  │ │  to PROD     │ │   │
+│  │  └──────────┘ └──────────┘ └────────┘ └──────────┘ └──────────────┘ │   │
+│  └───────────────────────────────────────────────────────────────────────┘   │
+└──────────────────────────────────────────────────────────────────────────────┘</pre></div>
+
+  <h3>What Gets Created During Onboarding</h3>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Asset</th><th>Description</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Git Repository</strong></td><td>Pre-populated with hello-world sample app, Dockerfile, build configs</td></tr>
+        <tr><td><strong>Harness Pipelines</strong></td><td>PR trigger, feature branch trigger, main branch build, release-to-STG, release-to-PROD</td></tr>
+        <tr><td><strong>AWS Accounts</strong></td><td>Dev, Test, Staging, Production (or subset)</td></tr>
+        <tr><td><strong>AWS Resources</strong></td><td>Any combination: Microservice infra, RDS, S3, DynamoDB</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- ════════════════════════ 2. PHILOSOPHY ════════════════════════ -->
+<section id="philosophy">
+  <h2 class="section-title"><span class="num">02</span> Testing Philosophy & Principles</h2>
+
+  <div class="callout callout-info">
+    <strong>Core Philosophy</strong>
+    <p>Test the real thing. No mocks at the E2E level. Every run starts with cleanup, every stage is observable, and failures are stage-gated so we don't waste time downstream.</p>
+  </div>
+
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Principle</th><th>What It Means</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Test the Real Thing</strong></td><td>Use actual UI, real APIs, real Git repos, real AWS resources</td></tr>
+        <tr><td><strong>Idempotent & Repeatable</strong></td><td>Every run starts with cleanup — same data, deterministic outcomes</td></tr>
+        <tr><td><strong>Observable</strong></td><td>Every stage produces logs, screenshots, API responses, status artifacts</td></tr>
+        <tr><td><strong>Stage-Gated</strong></td><td>Failure in Stage 2 stops execution — no wasted time in Stage 5</td></tr>
+        <tr><td><strong>Parallel When Safe</strong></td><td>Independent checks (S3, DynamoDB) run in parallel; sequential deploys remain serial</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>Scope Matrix</h3>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Layer</th><th>What We Test</th><th>Tool / Approach</th></tr></thead>
+      <tbody>
+        <tr><td>UI</td><td>Onboarding form, navigation, error states</td><td>Playwright</td></tr>
+        <tr><td>API</td><td>Onboarding, status polling, provisioning APIs</td><td>REST client (curl / Python requests)</td></tr>
+        <tr><td>Git</td><td>Repo creation, branch structure, file content</td><td>Git CLI / GitHub API</td></tr>
+        <tr><td>Harness</td><td>Pipeline existence, trigger validation, execution</td><td>Harness API</td></tr>
+        <tr><td>AWS</td><td>Account existence, RDS, S3, DynamoDB, ECS/EKS</td><td>AWS SDK (boto3)</td></tr>
+        <tr><td>Deployment</td><td>Hello-world deploys to dev/test/stg/prod</td><td>HTTP health checks</td></tr>
+        <tr><td>Triggers</td><td>File change triggers correct pipeline</td><td>Git push + Harness API polling</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- ════════════════════════ 3. TEST DATA ════════════════════════ -->
+<section id="data">
+  <h2 class="section-title"><span class="num">03</span> Test Data Strategy</h2>
+
+  <h3>Dedicated Test Identity</h3>
+  <pre><code><span class="lang-label">YAML</span>test_user:
+  name: "e2e-test-platform-user"
+  email: "e2e-test@internal.company.com"
+  team: "platform-e2e"
+
+test_project:
+  name: "e2e-test-project-001"
+  resources: [microservice, rds, s3, dynamodb]</code></pre>
+
+  <h3>Isolation Rules</h3>
+  <p>All test artifacts use a dedicated namespace (<code>e2e-test-*</code>) so cleanup is targeted and safe. AWS resources are tagged with <code>Environment: e2e-test</code>. Git repos follow a naming convention like <code>e2e-test-project-*</code>. Test data is never shared with manual or exploratory testing.</p>
+
+  <div class="callout callout-warn">
+    <strong>Cleanup-First Pattern</strong>
+    <p>Every E2E run begins by tearing down artifacts from the previous run. This ensures no stale state, enables data reuse, and prevents partial failures from blocking the next run.</p>
+  </div>
+</section>
+
+<!-- ════════════════════════ 4. PIPELINE STAGES ════════════════════════ -->
+<section id="pipeline">
+  <h2 class="section-title"><span class="num">04</span> E2E Pipeline — Stage-by-Stage</h2>
+  <p>The E2E suite is itself a Harness pipeline with 8 stages. Each stage validates a layer of the system.</p>
+
+  <div class="pipeline-flow">
+    <div class="pipeline-stage">
+      <div class="stage-num">STAGE 1</div>
+      <div class="stage-name">Cleanup & Reset</div>
+      <div class="stage-desc">Tear down all previous artifacts</div>
+    </div>
+    <div class="pipeline-stage">
+      <div class="stage-num">STAGE 2</div>
+      <div class="stage-name">UI Onboard</div>
+      <div class="stage-desc">Playwright onboarding flow</div>
+    </div>
+    <div class="pipeline-stage">
+      <div class="stage-num">STAGE 3</div>
+      <div class="stage-name">Provision Wait</div>
+      <div class="stage-desc">Poll until provisioning completes</div>
+    </div>
+    <div class="pipeline-stage">
+      <div class="stage-num">STAGE 4</div>
+      <div class="stage-name">Resource Verify</div>
+      <div class="stage-desc">Git, Harness, AWS validation</div>
+    </div>
+    <div class="pipeline-stage">
+      <div class="stage-num">STAGE 5</div>
+      <div class="stage-name">Initial Deploy</div>
+      <div class="stage-desc">Hello-world to dev</div>
+    </div>
+    <div class="pipeline-stage">
+      <div class="stage-num">STAGE 6</div>
+      <div class="stage-name">Trigger Test</div>
+      <div class="stage-desc">Push/PR/Merge triggers</div>
+    </div>
+    <div class="pipeline-stage">
+      <div class="stage-num">STAGE 7</div>
+      <div class="stage-name">Multi-Env Deploy</div>
+      <div class="stage-desc">Dev → Test → STG → Prod</div>
+    </div>
+    <div class="pipeline-stage">
+      <div class="stage-num">STAGE 8</div>
+      <div class="stage-name">Report & Cleanup</div>
+      <div class="stage-desc">Results, alerts, teardown</div>
+    </div>
+  </div>
+
+  <h3>Day-2 Extension Stages</h3>
+  <div class="pipeline-flow">
+    <div class="pipeline-stage" style="border-color: var(--purple);">
+      <div class="stage-num" style="color: var(--purple);">STAGE 9</div>
+      <div class="stage-name">Add Services</div>
+      <div class="stage-desc">UI: onboard additional resource</div>
+    </div>
+    <div class="pipeline-stage" style="border-color: var(--purple);">
+      <div class="stage-num" style="color: var(--purple);">STAGE 10</div>
+      <div class="stage-name">Code Change</div>
+      <div class="stage-desc">Git: push real app update</div>
+    </div>
+    <div class="pipeline-stage" style="border-color: var(--purple);">
+      <div class="stage-num" style="color: var(--purple);">STAGE 11</div>
+      <div class="stage-name">CI/CD Loop</div>
+      <div class="stage-desc">Build → Test → Deploy</div>
+    </div>
+    <div class="pipeline-stage" style="border-color: var(--purple);">
+      <div class="stage-num" style="color: var(--purple);">STAGE 12</div>
+      <div class="stage-name">Validate Live</div>
+      <div class="stage-desc">App uses new services</div>
+    </div>
+  </div>
+
+  <!-- Stage 1 -->
+  <h3>Stage 1: Cleanup & Reset</h3>
+  <p>Destroy all artifacts from previous runs. The goal is a clean slate before every execution.</p>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Step</th><th>Action</th><th>Method</th></tr></thead>
+      <tbody>
+        <tr><td>1.1</td><td>Delete test Git repo</td><td>GitHub API — <code>DELETE /repos/{org}/{repo}</code></td></tr>
+        <tr><td>1.2</td><td>Delete Harness pipelines</td><td>Harness API — delete <code>e2e-test-*</code></td></tr>
+        <tr><td>1.3</td><td>Tear down AWS resources</td><td>boto3 — delete resources tagged <code>e2e-test</code></td></tr>
+        <tr><td>1.4</td><td>Clean AWS accounts / org units</td><td>AWS Organizations API</td></tr>
+        <tr><td>1.5</td><td>Remove test project from platform DB</td><td>Admin API — <code>DELETE /admin/projects/{id}</code></td></tr>
+        <tr><td>1.6</td><td>Wait for async cleanup</td><td>Poll status / CloudFormation</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="callout callout-warn">
+    <strong>Error Handling</strong>
+    <p>If cleanup fails: retry once, then fail the entire pipeline. Never proceed with stale state. All operations should be idempotent — "not found" is a valid success.</p>
+  </div>
+
+  <pre><code><span class="lang-label">Bash</span># Example: Git repo cleanup
+RESPONSE=$(curl -s -o /dev/null -w "%{http_code}" \
+  -X DELETE -H "Authorization: token ${GIT_TOKEN}" \
+  "https://api.github.com/repos/${ORG}/${E2E_REPO_NAME}")
+
+if [[ "$RESPONSE" == "204" || "$RESPONSE" == "404" ]]; then
+  echo "✅ Git repo cleanup: OK"
+else
+  echo "❌ Git repo cleanup failed: HTTP $RESPONSE" && exit 1
+fi</code></pre>
+
+  <!-- Stage 2 -->
+  <h3>Stage 2: UI Onboarding</h3>
+  <p>Simulate a real developer onboarding through the actual UI using Playwright.</p>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Step</th><th>Action</th><th>Validation</th></tr></thead>
+      <tbody>
+        <tr><td>2.1</td><td>Navigate to View page</td><td>Page title matches, key elements visible</td></tr>
+        <tr><td>2.2</td><td>Navigate to Onboard page</td><td>Form loads correctly</td></tr>
+        <tr><td>2.3</td><td>Fill onboarding form</td><td>All fields accept input, resource checkboxes work</td></tr>
+        <tr><td>2.4</td><td>Submit request</td><td>Success status, request ID returned</td></tr>
+        <tr><td>2.5</td><td>Capture screenshots</td><td>Screenshots saved as pipeline artifacts</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <pre><code><span class="lang-label">TypeScript — Playwright</span>import { test, expect } from '@playwright/test';
+
+test('Developer onboarding', async ({ page }) =&gt; {
+  await page.goto(process.env.PLATFORM_URL!);
+  await expect(page).toHaveTitle(/Developer Platform/);
+  await page.screenshot({ path: 'artifacts/01-view-page.png' });
+
+  await page.click('[data-testid="onboard-cta"]');
+  await page.fill('[data-testid="project-name"]', 'e2e-test-project-001');
+  await page.fill('[data-testid="team-name"]', 'platform-e2e');
+  await page.check('[data-testid="resource-microservice"]');
+  await page.check('[data-testid="resource-rds"]');
+  await page.check('[data-testid="resource-s3"]');
+  await page.check('[data-testid="resource-dynamodb"]');
+
+  await page.click('[data-testid="submit-onboard"]');
+  const requestId = await page.locator('[data-testid="request-id"]').textContent();
+  console.log(`Request ID: ${requestId}`);
+});</code></pre>
+
+  <div class="callout callout-info">
+    <strong>Alternative: API-Only Onboarding</strong>
+    <p>For faster, more reliable runs, replace UI onboarding with a direct API call. Run the full Playwright tests on a separate nightly cadence.</p>
+  </div>
+
+  <!-- Stage 3 -->
+  <h3>Stage 3: Provisioning Wait & Verify</h3>
+  <p>Poll the platform's status API with exponential backoff until provisioning completes or times out (15 min).</p>
+  <pre><code><span class="lang-label">Python</span>import time, requests, sys, os
+
+TIMEOUT, INTERVAL = 900, 30
+start = time.time()
+while time.time() - start &lt; TIMEOUT:
+    resp = requests.get(f"{API}/onboard/status/{REQUEST_ID}",
+                        headers={"Authorization": f"Bearer {TOKEN}"})
+    status = resp.json().get("status")
+    if status == "COMPLETED":
+        print("✅ Provisioning complete!")
+        sys.exit(0)
+    elif status == "FAILED":
+        print(f"❌ FAILED: {resp.json().get('error')}")
+        sys.exit(1)
+    time.sleep(INTERVAL)
+print("❌ TIMEOUT")
+sys.exit(1)</code></pre>
+
+  <!-- Stage 4 -->
+  <h3>Stage 4: Resource Verification</h3>
+  <p>Three parallel verification groups validate every provisioned asset.</p>
+
+  <h4>4A — Git Repo Validation</h4>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Check</th><th>Expected</th></tr></thead>
+      <tbody>
+        <tr><td>Repo exists</td><td>HTTP 200 from Git API</td></tr>
+        <tr><td>Default branch</td><td><code>main</code></td></tr>
+        <tr><td>Contains Dockerfile</td><td>File at root</td></tr>
+        <tr><td>Contains sample app</td><td><code>src/</code> with hello-world</td></tr>
+        <tr><td>Contains pipeline configs</td><td><code>.harness/</code> directory</td></tr>
+        <tr><td>Branch protection</td><td><code>main</code> protected</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h4>4B — Harness Pipeline Validation</h4>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Pipeline</th><th>Trigger Type</th></tr></thead>
+      <tbody>
+        <tr><td>PR Build</td><td>Webhook — Pull Request</td></tr>
+        <tr><td>Feature Build</td><td>Branch — <code>feature/*</code></td></tr>
+        <tr><td>Main Build</td><td>Branch — <code>main</code> merge</td></tr>
+        <tr><td>Release STG</td><td>Manual / Release trigger</td></tr>
+        <tr><td>Release PROD</td><td>Manual with approval gate</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h4>4C — AWS Resource Validation</h4>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Resource</th><th>Validation</th></tr></thead>
+      <tbody>
+        <tr><td>AWS Accounts</td><td>Exist, assume-role works</td></tr>
+        <tr><td>Microservice (ECS/EKS)</td><td>Service exists, status ACTIVE</td></tr>
+        <tr><td>RDS</td><td>Instance exists, status <code>available</code></td></tr>
+        <tr><td>S3</td><td>Bucket exists, encryption enabled, correct tags</td></tr>
+        <tr><td>DynamoDB</td><td>Table exists, correct key schema, status ACTIVE</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Stage 5 -->
+  <h3>Stage 5: Initial Hello-World Deployment</h3>
+  <p>Trigger the main-branch pipeline via Harness API, wait for completion, then hit the hello-world health endpoint on dev.</p>
+  <pre><code><span class="lang-label">Bash</span># Trigger and poll
+EXECUTION_ID=$(curl -s -X POST \
+  -H "x-api-key: ${HARNESS_API_KEY}" \
+  "${HARNESS_API}/pipeline/execute/${MAIN_PIPELINE_ID}" | jq -r '.data.planExecution.uuid')
+
+scripts/poll_pipeline.sh "$EXECUTION_ID" 600
+
+# Validate
+HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" \
+  "https://e2e-test-project-001.dev.internal.company.com/health")
+[[ "$HTTP_CODE" == "200" ]] && echo "✅ Deployed to DEV" || exit 1</code></pre>
+</section>
+
+<!-- ════════════════════════ 5. TRIGGER VALIDATION ════════════════════════ -->
+<section id="triggers">
+  <h2 class="section-title"><span class="num">05</span> Pipeline Trigger Validation (Stage 6)</h2>
+  <p>This is the most critical integration test — proving Git events correctly trigger Harness pipelines end-to-end.</p>
+
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Step</th><th>Git Action</th><th>Expected Pipeline</th><th>Verification</th></tr></thead>
+      <tbody>
+        <tr><td>6.1–6.4</td><td>Create feature branch, modify file, push</td><td>Feature branch pipeline</td><td>Harness API shows Running execution</td></tr>
+        <tr><td>6.5–6.6</td><td>Create PR to main</td><td>PR build pipeline</td><td>Harness API shows Running execution</td></tr>
+        <tr><td>6.7–6.8</td><td>Merge PR to main</td><td>Main branch pipeline</td><td>Harness API shows Running execution</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <pre><code><span class="lang-label">Bash</span># Clone → Branch → Modify → Push → Verify trigger
+git clone "https://${GIT_TOKEN}@github.com/${ORG}/${REPO}.git" /tmp/e2e
+cd /tmp/e2e
+git checkout -b feature/e2e-trigger-test
+echo "# E2E test - $(date -u +%Y%m%dT%H%M%SZ)" >> README.md
+git add . && git commit -m "e2e: trigger test" && git push origin feature/e2e-trigger-test
+
+sleep 60  # Wait for webhook
+
+EXEC=$(curl -s -H "x-api-key: ${HARNESS_API_KEY}" \
+  "${HARNESS_API}/pipeline/executions?pipelineId=${FEATURE_PIPELINE}&status=Running" \
+  | jq -r '.data.content[0].planExecution.uuid // empty')
+
+[[ -n "$EXEC" ]] && echo "✅ Feature push triggered pipeline" || exit 1</code></pre>
+</section>
+
+<!-- ════════════════════════ 6. MULTI-ENV DEPLOY ════════════════════════ -->
+<section id="deploy">
+  <h2 class="section-title"><span class="num">06</span> Multi-Environment Deployment (Stage 7)</h2>
+  <p>Promote the hello-world app through all environments and validate health at each stage.</p>
+
+  <div class="pipeline-flow">
+    <div class="pipeline-stage" style="border-color: var(--green);">
+      <div class="stage-num" style="color: var(--green);">DEV</div>
+      <div class="stage-name">Deploy</div>
+      <div class="stage-desc">Health check ✓</div>
+    </div>
+    <div class="pipeline-stage" style="border-color: var(--green);">
+      <div class="stage-num" style="color: var(--green);">TEST</div>
+      <div class="stage-name">Deploy</div>
+      <div class="stage-desc">Health check ✓</div>
+    </div>
+    <div class="pipeline-stage" style="border-color: var(--orange);">
+      <div class="stage-num" style="color: var(--orange);">STG</div>
+      <div class="stage-name">Deploy</div>
+      <div class="stage-desc">Approval + check</div>
+    </div>
+    <div class="pipeline-stage" style="border-color: var(--red);">
+      <div class="stage-num" style="color: var(--red);">PROD</div>
+      <div class="stage-name">Deploy</div>
+      <div class="stage-desc">Approval + check</div>
+    </div>
+  </div>
+
+  <pre><code><span class="lang-label">Python</span>ENVIRONMENTS = {
+    "dev":  "https://e2e-test-project-001.dev.internal.company.com/health",
+    "test": "https://e2e-test-project-001.test.internal.company.com/health",
+    "stg":  "https://e2e-test-project-001.stg.internal.company.com/health",
+    "prod": "https://e2e-test-project-001.prod.internal.company.com/health",
+}
+
+for env, url in ENVIRONMENTS.items():
+    resp = requests.get(url, timeout=10)
+    status = "✅" if resp.status_code == 200 else "❌"
+    print(f"  {env:&gt;5}: {status}")</code></pre>
+</section>
+
+<!-- ════════════════════════ 7. DAY-2 OPERATIONS ════════════════════════ -->
+<section id="day2">
+  <h2 class="section-title"><span class="num">07</span> Day-2 Operations: Additional Services & CI/CD Validation</h2>
+  <p>After the initial provisioning and hello-world deployment (Stages 1–7), the E2E suite must also validate <strong>Day-2 workflows</strong> — the operations a developer performs after their first onboarding: adding new services, pushing code changes, and verifying the full CI/CD loop end-to-end.</p>
+
+  <div class="callout callout-info">
+    <strong>Why This Matters</strong>
+    <p>Initial onboarding proves the platform can create things. Day-2 testing proves the platform works as a living, usable development environment — which is what developers actually care about.</p>
+  </div>
+
+  <h3>Extended Pipeline: Stages 9–12</h3>
+  <p>These stages run <strong>after</strong> the initial hello-world deployment is validated. They extend the pipeline with real-world developer workflows.</p>
+
+  <div class="pipeline-flow">
+    <div class="pipeline-stage" style="border-color: var(--text-muted); opacity: 0.5;">
+      <div class="stage-num">STAGES 1–8</div>
+      <div class="stage-name">Initial E2E</div>
+      <div class="stage-desc">Onboard + Deploy</div>
+    </div>
+    <div class="pipeline-stage" style="border-color: var(--purple);">
+      <div class="stage-num" style="color: var(--purple);">STAGE 9</div>
+      <div class="stage-name">Add Services</div>
+      <div class="stage-desc">Onboard DynamoDB, S3, etc.</div>
+    </div>
+    <div class="pipeline-stage" style="border-color: var(--purple);">
+      <div class="stage-num" style="color: var(--purple);">STAGE 10</div>
+      <div class="stage-name">Code Change</div>
+      <div class="stage-desc">Push real app update</div>
+    </div>
+    <div class="pipeline-stage" style="border-color: var(--purple);">
+      <div class="stage-num" style="color: var(--purple);">STAGE 11</div>
+      <div class="stage-name">CI/CD Loop</div>
+      <div class="stage-desc">Build → Test → Deploy</div>
+    </div>
+    <div class="pipeline-stage" style="border-color: var(--purple);">
+      <div class="stage-num" style="color: var(--purple);">STAGE 12</div>
+      <div class="stage-name">Validate Live</div>
+      <div class="stage-desc">App uses new services</div>
+    </div>
+  </div>
+
+  <!-- Stage 9 -->
+  <h3>Stage 9: Additional Service Onboarding</h3>
+  <p>After initial provisioning, a developer should be able to request additional AWS resources (e.g., add a DynamoDB table to a project that only had RDS). This stage tests that incremental onboarding flow.</p>
+
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Step</th><th>Action</th><th>Tool</th><th>Validation</th></tr></thead>
+      <tbody>
+        <tr><td>9.1</td><td>Navigate to project dashboard in UI</td><td>Playwright</td><td>Existing project shows with correct resources</td></tr>
+        <tr><td>9.2</td><td>Click "Add Service" / "Request Resource"</td><td>Playwright</td><td>Add-service form loads</td></tr>
+        <tr><td>9.3</td><td>Select additional resource (e.g., ElastiCache, SQS, new DynamoDB table)</td><td>Playwright</td><td>Form accepts selection</td></tr>
+        <tr><td>9.4</td><td>Submit request</td><td>Playwright</td><td>Request ID returned, status = pending</td></tr>
+        <tr><td>9.5</td><td>Poll provisioning status</td><td>Python (requests)</td><td>Status transitions to COMPLETED</td></tr>
+        <tr><td>9.6</td><td>Verify new AWS resource exists</td><td>Python (boto3)</td><td>Resource exists, tagged correctly, status ACTIVE</td></tr>
+        <tr><td>9.7</td><td>Verify existing resources unaffected</td><td>Python (boto3)</td><td>RDS, S3, original DynamoDB still healthy</td></tr>
+        <tr><td>9.8</td><td>Verify Harness pipelines updated (if applicable)</td><td>Python (requests)</td><td>Pipeline configs include new resource references</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <pre><code><span class="lang-label">TypeScript — Playwright</span>// e2e/tests/add-service.spec.ts
+import { test, expect } from '@playwright/test';
+
+test('Add DynamoDB table to existing project', async ({ page }) =&gt; {
+  // Navigate to existing project
+  await page.goto(`${process.env.PLATFORM_URL}/projects/e2e-test-project-001`);
+  await expect(page.locator('[data-testid="project-status"]')).toContainText('Active');
+  await page.screenshot({ path: 'artifacts/09-project-dashboard.png' });
+
+  // Request additional resource
+  await page.click('[data-testid="add-service-btn"]');
+  await page.selectOption('[data-testid="resource-type"]', 'dynamodb');
+  await page.fill('[data-testid="resource-name"]', 'e2e-orders-table');
+  await page.fill('[data-testid="partition-key"]', 'orderId');
+  await page.screenshot({ path: 'artifacts/09-add-service-form.png' });
+
+  await page.click('[data-testid="submit-add-service"]');
+  const addRequestId = await page.locator('[data-testid="add-request-id"]').textContent();
+  console.log(`Add Service Request: ${addRequestId}`);
+  await page.screenshot({ path: 'artifacts/09-add-service-confirmed.png' });
+});</code></pre>
+
+  <pre><code><span class="lang-label">Python — Resource Verification</span># scripts/verify_additional_service.py
+import boto3, time, requests, os
+
+def wait_for_additional_provisioning(request_id, timeout=600):
+    """Poll until the additional service is provisioned."""
+    api = os.environ["PLATFORM_API"]
+    token = os.environ["PLATFORM_TOKEN"]
+    start = time.time()
+    while time.time() - start &lt; timeout:
+        resp = requests.get(
+            f"{api}/services/status/{request_id}",
+            headers={"Authorization": f"Bearer {token}"}
+        )
+        status = resp.json().get("status")
+        if status == "COMPLETED":
+            return resp.json()
+        elif status == "FAILED":
+            raise Exception(f"Additional service provisioning failed: {resp.json()}")
+        time.sleep(20)
+    raise TimeoutError("Additional service provisioning timed out")
+
+def verify_new_dynamodb_table(session, table_name):
+    """Verify the newly added DynamoDB table exists and is configured."""
+    dynamodb = session.client('dynamodb')
+    resp = dynamodb.describe_table(TableName=table_name)
+    table = resp['Table']
+    assert table['TableStatus'] == 'ACTIVE', f"Table status: {table['TableStatus']}"
+    
+    # Verify key schema
+    keys = {k['AttributeName']: k['KeyType'] for k in table['KeySchema']}
+    assert 'orderId' in keys, "Partition key 'orderId' not found"
+    print(f"✅ DynamoDB table {table_name} is ACTIVE with correct schema")
+
+def verify_existing_resources_unaffected(session, project_config):
+    """Ensure adding a service didn't break existing resources."""
+    # Check RDS still available
+    rds = session.client('rds')
+    resp = rds.describe_db_instances(DBInstanceIdentifier=project_config['rds_id'])
+    assert resp['DBInstances'][0]['DBInstanceStatus'] == 'available'
+    print("✅ Existing RDS still available")
+    
+    # Check S3 still accessible
+    s3 = session.client('s3')
+    s3.head_bucket(Bucket=project_config['s3_bucket'])
+    print("✅ Existing S3 bucket still accessible")
+    
+    # Check original DynamoDB table
+    dynamodb = session.client('dynamodb')
+    resp = dynamodb.describe_table(TableName=project_config['dynamodb_table'])
+    assert resp['Table']['TableStatus'] == 'ACTIVE'
+    print("✅ Existing DynamoDB table still ACTIVE")</code></pre>
+
+  <!-- Stage 10 -->
+  <h3>Stage 10: Code Change — Push a Real Application Update</h3>
+  <p>This stage simulates a developer making a meaningful code change — not just editing a README, but modifying actual application code to use the newly provisioned service, then pushing it through the CI/CD pipeline.</p>
+
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Step</th><th>Action</th><th>Tool</th><th>Detail</th></tr></thead>
+      <tbody>
+        <tr><td>10.1</td><td>Clone the project repo</td><td>Python (subprocess/git)</td><td><code>git clone</code> to temp directory</td></tr>
+        <tr><td>10.2</td><td>Create feature branch</td><td>Python (subprocess/git)</td><td><code>git checkout -b feature/e2e-add-orders-endpoint</code></td></tr>
+        <tr><td>10.3</td><td>Modify application code</td><td>Python (file I/O)</td><td>Add a new /orders endpoint that reads from DynamoDB</td></tr>
+        <tr><td>10.4</td><td>Update config to reference new DynamoDB table</td><td>Python (file I/O)</td><td>Update env config or app config file</td></tr>
+        <tr><td>10.5</td><td>Commit and push</td><td>Python (subprocess/git)</td><td><code>git add . && git commit && git push</code></td></tr>
+        <tr><td>10.6</td><td>Create PR via API</td><td>Python (requests)</td><td>GitHub API: create pull request</td></tr>
+        <tr><td>10.7</td><td>Wait for PR pipeline to succeed</td><td>Python (requests)</td><td>Poll Harness API for execution status</td></tr>
+        <tr><td>10.8</td><td>Merge PR</td><td>Python (requests)</td><td>GitHub API: merge pull request</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <pre><code><span class="lang-label">Python — Code Change & Push</span># scripts/day2_code_change.py
+import subprocess, os, json, tempfile, requests
+
+GIT_TOKEN = os.environ["GIT_TOKEN"]
+ORG = os.environ["ORG"]
+REPO = os.environ["E2E_REPO_NAME"]
+
+def clone_and_branch(repo_url, branch_name):
+    """Clone repo and create feature branch."""
+    work_dir = tempfile.mkdtemp(prefix="e2e-day2-")
+    subprocess.run(["git", "clone", repo_url, work_dir], check=True)
+    subprocess.run(["git", "checkout", "-b", branch_name], cwd=work_dir, check=True)
+    return work_dir
+
+def add_orders_endpoint(work_dir):
+    """Add a new /orders endpoint that uses DynamoDB."""
+    # Read existing app file
+    app_file = os.path.join(work_dir, "src", "app.py")  # or app.js, etc.
+    with open(app_file, "r") as f:
+        content = f.read()
+    
+    # Append new endpoint
+    new_code = '''
+
+# --- E2E Day-2 Test: Orders Endpoint ---
+@app.route('/orders', methods=['GET'])
+def get_orders():
+    dynamodb = boto3.resource('dynamodb')
+    table = dynamodb.Table(os.environ.get('ORDERS_TABLE', 'e2e-orders-table'))
+    response = table.scan(Limit=10)
+    return jsonify({"orders": response.get('Items', []), "status": "ok"})
+'''
+    with open(app_file, "w") as f:
+        f.write(content + new_code)
+    
+    # Update config
+    config_file = os.path.join(work_dir, "config", "env.json")
+    if os.path.exists(config_file):
+        with open(config_file, "r") as f:
+            config = json.load(f)
+        config["ORDERS_TABLE"] = "e2e-orders-table"
+        with open(config_file, "w") as f:
+            json.dump(config, f, indent=2)
+
+def commit_and_push(work_dir, branch_name):
+    """Commit changes and push to remote."""
+    subprocess.run(["git", "add", "."], cwd=work_dir, check=True)
+    subprocess.run(
+        ["git", "commit", "-m", "feat: add orders endpoint using DynamoDB [e2e-day2]"],
+        cwd=work_dir, check=True
+    )
+    subprocess.run(
+        ["git", "push", "origin", branch_name],
+        cwd=work_dir, check=True
+    )
+
+def create_and_merge_pr(branch_name):
+    """Create PR via GitHub API, wait for CI, then merge."""
+    headers = {"Authorization": f"token {GIT_TOKEN}"}
+    
+    # Create PR
+    pr_resp = requests.post(
+        f"https://api.github.com/repos/{ORG}/{REPO}/pulls",
+        headers=headers,
+        json={
+            "title": "feat: add orders endpoint [e2e-day2]",
+            "head": branch_name,
+            "base": "main",
+            "body": "Automated E2E Day-2 test — adds /orders endpoint"
+        }
+    )
+    pr_number = pr_resp.json()["number"]
+    print(f"✅ PR #{pr_number} created")
+    
+    # ... wait for PR pipeline (see Stage 6 polling logic) ...
+    
+    # Merge PR
+    merge_resp = requests.put(
+        f"https://api.github.com/repos/{ORG}/{REPO}/pulls/{pr_number}/merge",
+        headers=headers,
+        json={"merge_method": "squash"}
+    )
+    assert merge_resp.status_code == 200, f"Merge failed: {merge_resp.text}"
+    print(f"✅ PR #{pr_number} merged to main")</code></pre>
+
+  <!-- Stage 11 -->
+  <h3>Stage 11: Full CI/CD Loop Validation</h3>
+  <p>After the PR merge triggers the main pipeline, validate the entire build → test → deploy cycle completes successfully with the new code.</p>
+
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Step</th><th>What to Validate</th><th>Tool</th></tr></thead>
+      <tbody>
+        <tr><td>11.1</td><td>Main pipeline triggered by merge</td><td>Python — Harness API poll</td></tr>
+        <tr><td>11.2</td><td>Build stage succeeds (Docker image built with new code)</td><td>Python — Harness execution status</td></tr>
+        <tr><td>11.3</td><td>Unit tests pass within pipeline</td><td>Python — Harness stage logs</td></tr>
+        <tr><td>11.4</td><td>Deploy to dev succeeds</td><td>Python — health check HTTP 200</td></tr>
+        <tr><td>11.5</td><td>Promote to test/stg/prod</td><td>Python — Harness API trigger + health checks</td></tr>
+        <tr><td>11.6</td><td>Verify deployment version matches merged commit</td><td>Python — <code>/version</code> endpoint or image tag</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <pre><code><span class="lang-label">Python</span># scripts/validate_cicd_loop.py
+def validate_full_cicd(harness_api, api_key, main_pipeline_id, commit_sha):
+    """Wait for main pipeline, then validate deployment has the right version."""
+    
+    # Wait for main pipeline execution triggered by merge
+    execution = poll_for_new_execution(
+        harness_api, api_key, main_pipeline_id,
+        timeout=120, status_filter="Running"
+    )
+    print(f"✅ Main pipeline triggered: {execution['uuid']}")
+    
+    # Wait for pipeline to complete
+    final_status = poll_execution_status(
+        harness_api, api_key, execution['uuid'], timeout=600
+    )
+    assert final_status == "SUCCESS", f"Pipeline failed: {final_status}"
+    print("✅ Main pipeline completed successfully")
+    
+    # Validate deployed version matches our commit
+    for env in ["dev", "test"]:
+        resp = requests.get(
+            f"https://e2e-test-project-001.{env}.internal.company.com/version"
+        )
+        deployed_sha = resp.json().get("commit", resp.json().get("version"))
+        assert commit_sha[:8] in str(deployed_sha), \
+            f"Version mismatch in {env}: expected {commit_sha[:8]}, got {deployed_sha}"
+        print(f"✅ {env}: deployed version matches commit {commit_sha[:8]}")</code></pre>
+
+  <!-- Stage 12 -->
+  <h3>Stage 12: Live Application Validation</h3>
+  <p>The final stage validates that the deployed application actually <em>uses</em> the newly provisioned services — not just that the resources exist, but that the app can read/write to them.</p>
+
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Step</th><th>Action</th><th>Tool</th><th>Validation</th></tr></thead>
+      <tbody>
+        <tr><td>12.1</td><td>Seed test data into new DynamoDB table</td><td>Python (boto3)</td><td>PutItem succeeds</td></tr>
+        <tr><td>12.2</td><td>Hit the new <code>/orders</code> endpoint</td><td>Python (requests)</td><td>Returns 200 with seeded data</td></tr>
+        <tr><td>12.3</td><td>Hit the original <code>/health</code> endpoint</td><td>Python (requests)</td><td>Still returns 200 (no regression)</td></tr>
+        <tr><td>12.4</td><td>Validate S3 read/write from app (if applicable)</td><td>Python (requests + boto3)</td><td>Upload via app, verify in S3</td></tr>
+        <tr><td>12.5</td><td>Validate RDS connectivity from app</td><td>Python (requests)</td><td>App can query DB, returns results</td></tr>
+        <tr><td>12.6</td><td>Check CloudWatch/logs for errors</td><td>Python (boto3 logs)</td><td>No ERROR-level entries post-deploy</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <pre><code><span class="lang-label">Python</span># scripts/validate_live_app.py
+import boto3, requests
+
+def validate_orders_endpoint(app_base_url, dynamodb_session):
+    """Seed data, hit the app, verify it reads from DynamoDB."""
+    
+    # 1. Seed test data
+    table = dynamodb_session.resource('dynamodb').Table('e2e-orders-table')
+    table.put_item(Item={
+        'orderId': 'e2e-order-001',
+        'product': 'E2E Test Widget',
+        'quantity': 1,
+        'status': 'confirmed'
+    })
+    print("✅ Seeded test order into DynamoDB")
+    
+    # 2. Hit the new endpoint
+    resp = requests.get(f"{app_base_url}/orders", timeout=10)
+    assert resp.status_code == 200, f"Orders endpoint returned {resp.status_code}"
+    orders = resp.json().get("orders", [])
+    assert any(o['orderId'] == 'e2e-order-001' for o in orders), \
+        "Seeded order not found in response"
+    print("✅ /orders endpoint returns seeded data from DynamoDB")
+    
+    # 3. Verify original health endpoint still works
+    health = requests.get(f"{app_base_url}/health", timeout=10)
+    assert health.status_code == 200, "Health check failed after code change!"
+    print("✅ /health endpoint still healthy (no regression)")
+    
+    # 4. Cleanup test data
+    table.delete_item(Key={'orderId': 'e2e-order-001'})
+    print("✅ Cleaned up test data")</code></pre>
+
+  <div class="callout callout-success">
+    <strong>Full Day-2 Flow Summary</strong>
+    <p><strong>Add Service (UI)</strong> → Verify resource provisioned → <strong>Push code change (Git)</strong> → PR pipeline passes → Merge → Main pipeline deploys → <strong>Validate app uses new resource (HTTP + AWS SDK)</strong>. This proves the platform is a real, usable development environment.</p>
+  </div>
+</section>
+
+<!-- ════════════════════════ 8. LANGUAGE STRATEGY ════════════════════════ -->
+<section id="langstrategy">
+  <h2 class="section-title"><span class="num">08</span> Language Strategy: Playwright + Python Hybrid</h2>
+
+  <div class="callout callout-warn">
+    <strong>Decision Summary</strong>
+    <p><strong>Recommended: Playwright (TypeScript) for UI + Python for everything else.</strong> This is a deliberate split, not a compromise. Each tool handles what it's best at. Trying to do everything in Playwright is possible but creates unnecessary pain.</p>
+  </div>
+
+  <h3>Can You Do Everything in Playwright?</h3>
+  <p>Technically, yes. Playwright can execute shell commands via Node.js <code>child_process</code>, make HTTP requests via <code>fetch</code>, and even interact with AWS using the JS SDK. But <strong>just because you can doesn't mean you should</strong>. Here's the honest breakdown:</p>
+
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Task</th><th>Playwright (TS/JS)</th><th>Python</th><th>Verdict</th></tr></thead>
+      <tbody>
+        <tr>
+          <td><strong>UI Interactions</strong><br>Form fills, clicks, navigation, screenshots</td>
+          <td><span class="tag tag-pass">Excellent</span> — this is its entire purpose</td>
+          <td>Possible (Playwright has Python bindings) but TS is the first-class citizen</td>
+          <td style="color: var(--accent);"><strong>→ Playwright</strong></td>
+        </tr>
+        <tr>
+          <td><strong>Git Operations</strong><br>Clone, branch, modify files, commit, push</td>
+          <td>Awkward — requires <code>child_process.exec('git clone ...')</code>, string interpolation, error handling is clunky</td>
+          <td><span class="tag tag-pass">Natural</span> — <code>subprocess.run()</code> + native file I/O, <code>GitPython</code> library available</td>
+          <td style="color: var(--green);"><strong>→ Python</strong></td>
+        </tr>
+        <tr>
+          <td><strong>File Modification</strong><br>Read/write source code, update configs</td>
+          <td>Possible via <code>fs</code> module but verbose for JSON/YAML manipulation</td>
+          <td><span class="tag tag-pass">Natural</span> — <code>json.load/dump</code>, <code>pathlib</code>, <code>pyyaml</code></td>
+          <td style="color: var(--green);"><strong>→ Python</strong></td>
+        </tr>
+        <tr>
+          <td><strong>REST API Calls</strong><br>Harness API, GitHub API, Platform API</td>
+          <td>Good with <code>fetch</code> / <code>axios</code></td>
+          <td><span class="tag tag-pass">Excellent</span> — <code>requests</code> library is extremely clean</td>
+          <td style="color: var(--green);"><strong>→ Python</strong> (simpler syntax, better for polling loops)</td>
+        </tr>
+        <tr>
+          <td><strong>AWS Resource Validation</strong><br>boto3 for RDS, S3, DynamoDB, ECS checks</td>
+          <td>Possible via AWS JS SDK, but less documented for infrastructure automation</td>
+          <td><span class="tag tag-pass">Excellent</span> — boto3 is the gold standard for AWS automation</td>
+          <td style="color: var(--green);"><strong>→ Python</strong></td>
+        </tr>
+        <tr>
+          <td><strong>Polling & Waiting</strong><br>Status checks with backoff and timeout</td>
+          <td>Async/await works but Playwright test timeouts can interfere</td>
+          <td><span class="tag tag-pass">Simple</span> — <code>time.sleep()</code> + loops, no event loop complexity</td>
+          <td style="color: var(--green);"><strong>→ Python</strong></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>Why Not All-Playwright? The Real Problems</h3>
+
+  <div class="callout callout-warn">
+    <strong>Problem 1: Test Timeout Hell</strong>
+    <p>Playwright tests have default timeouts (30s per action, 5min per test). When you're polling AWS provisioning for 15 minutes or waiting for a Harness pipeline to complete, you're fighting the framework instead of using it. You'd need to set absurdly high timeouts, losing the benefit of Playwright's timeout safety net for actual UI tests.</p>
+  </div>
+
+  <div class="callout callout-warn">
+    <strong>Problem 2: Error Context</strong>
+    <p>When a Python boto3 call fails, you get a clear <code>ClientError</code> with the AWS error code. When a <code>child_process.exec('aws dynamodb describe-table ...')</code> fails inside Playwright, you get a string of stderr output that you have to parse yourself. Debugging is significantly harder.</p>
+  </div>
+
+  <div class="callout callout-warn">
+    <strong>Problem 3: Dependency Bloat</strong>
+    <p>Your Playwright container needs Node.js + browsers + Chromium. Adding the AWS JS SDK, git tools, and all infrastructure libraries makes the image huge and fragile. Better to have a lean Playwright image for UI and a lean Python image for infra.</p>
+  </div>
+
+  <h3>Recommended Architecture: Two Test Harnesses, One Pipeline</h3>
+
+  <div class="diagram"><pre>
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                    HARNESS E2E PIPELINE                                      │
+│                                                                              │
+│  ┌─────────────────────────┐    ┌──────────────────────────────────────────┐ │
+│  │  PLAYWRIGHT (TypeScript) │    │  PYTHON (pytest + boto3 + requests)      │ │
+│  │  ━━━━━━━━━━━━━━━━━━━━━━ │    │  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ │ │
+│  │                          │    │                                          │ │
+│  │  ✓ Onboarding form fill  │    │  ✓ Provisioning status polling           │ │
+│  │  ✓ Add-service UI flow   │    │  ✓ AWS resource verification (boto3)     │ │
+│  │  ✓ Dashboard validation  │    │  ✓ Git clone/branch/modify/push          │ │
+│  │  ✓ Error state testing   │    │  ✓ GitHub API (PR create, merge)         │ │
+│  │  ✓ Screenshots capture   │    │  ✓ Harness API (trigger, poll, status)   │ │
+│  │  ✓ Console error checks  │    │  ✓ Health check HTTP calls               │ │
+│  │                          │    │  ✓ DynamoDB/S3/RDS connectivity tests    │ │
+│  │  → Output: request IDs,  │    │  ✓ Log analysis (CloudWatch)             │ │
+│  │    screenshots, cookies   │    │                                          │ │
+│  └────────────┬─────────────┘    │  → Output: pass/fail, resource ARNs,    │ │
+│               │                  │    execution IDs, deployment versions     │ │
+│               │   Handoff via    └──────────────┬───────────────────────────┘ │
+│               │   pipeline vars                 │                             │
+│               └──────────────┬──────────────────┘                             │
+│                              ▼                                                │
+│                    Harness Pipeline Variables                                  │
+│                    (REQUEST_ID, COMMIT_SHA, etc.)                              │
+└─────────────────────────────────────────────────────────────────────────────┘</pre></div>
+
+  <h3>How They Communicate</h3>
+  <p>Playwright stages and Python stages are separate steps in the same Harness pipeline. Data flows between them via <strong>Harness pipeline variables</strong> and <strong>output variables</strong>:</p>
+
+  <pre><code><span class="lang-label">YAML — Harness Pipeline</span># Playwright step outputs → Python step inputs
+- step:
+    name: "UI Onboarding"
+    type: Run
+    spec:
+      connectorRef: e2e_docker_connector
+      image: e2e-playwright:latest
+      shell: Sh
+      command: |
+        npx playwright test onboarding.spec.ts
+        # Write outputs for downstream steps
+        echo "REQUEST_ID=$(cat artifacts/request-id.txt)" &gt;&gt; $HARNESS_OUTPUT
+      outputVariables:
+        - name: REQUEST_ID
+
+- step:
+    name: "Poll Provisioning"
+    type: Run
+    spec:
+      connectorRef: e2e_docker_connector
+      image: e2e-python:latest
+      shell: Sh
+      command: |
+        # Read from previous step
+        python3 scripts/poll_provisioning.py \
+          --request-id "&lt;+steps.UI_Onboarding.output.outputVariables.REQUEST_ID&gt;"
+      envVariables:
+        REQUEST_ID: "&lt;+steps.UI_Onboarding.output.outputVariables.REQUEST_ID&gt;"</code></pre>
+
+  <h3>What About Playwright Python Bindings?</h3>
+  <p>Playwright offers Python bindings (<code>playwright-python</code>). You <em>could</em> write everything in Python using these. However, the TypeScript bindings are the primary/first-class implementation — better docs, faster updates, and the auto-wait/selector engine is more battle-tested. If your team is Python-only and strongly prefers it, Playwright-Python is a viable option but expect slightly lagging documentation and community support.</p>
+
+  <div class="callout callout-info">
+    <strong>Decision Criteria</strong>
+    <p>If your team has strong TypeScript skills → <strong>Playwright TS + Python</strong> (recommended).<br>
+    If your team is Python-only → <strong>Playwright Python + Python</strong> (viable, single language, slight tradeoff on Playwright ecosystem).<br>
+    If you insist on all-Playwright-TS → Expect pain on git ops, AWS, and polling. Not recommended.</p>
+  </div>
+</section>
+
+<!-- ════════════════════════ 9. DOCKER STRATEGY ════════════════════════ -->
+<section id="docker">
+  <h2 class="section-title"><span class="num">09</span> Docker Containerization: Analysis & Recommendation</h2>
+
+  <div class="callout callout-success">
+    <strong>Verdict: Yes, Use Docker. But smartly.</strong>
+    <p>Dockerizing your E2E tests is the right call for Harness pipelines, but you don't need a single monolithic container. Use <strong>two purpose-built images</strong> and lean on Harness's native step orchestration.</p>
+  </div>
+
+  <h3>Why Docker Is the Right Choice</h3>
+
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Benefit</th><th>Why It Matters for E2E</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Reproducibility</strong></td><td>Playwright needs specific browser binaries (Chromium, Firefox). Python needs specific boto3/requests versions. Docker guarantees the exact same environment every run — no "works on the delegate but not in CI" issues.</td></tr>
+        <tr><td><strong>Isolation</strong></td><td>E2E tests touch real AWS accounts and Git repos. Running in a container provides a clean, isolated filesystem. No leftover git credentials, no stale AWS token caches.</td></tr>
+        <tr><td><strong>Harness Compatibility</strong></td><td>Harness CI <code>Run</code> steps natively support Docker images. Your steps just reference <code>image: your-registry/e2e-tests:latest</code> and everything works. No delegate plugin installation needed.</td></tr>
+        <tr><td><strong>Portability</strong></td><td>Same images can run locally for debugging (<code>docker run -it e2e-python bash</code>), in Harness CI, in GitHub Actions, or in any other CI system. No vendor lock-in on the test execution.</td></tr>
+        <tr><td><strong>Version Pinning</strong></td><td>Pin Playwright version, browser version, Python packages, AWS CLI version. No surprises when a delegate gets patched.</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>Why Not Run Directly on the Harness Delegate?</h3>
+
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Approach</th><th>Problem</th></tr></thead>
+      <tbody>
+        <tr><td>Shell scripts on delegate</td><td>Delegate may not have Python 3.11, boto3, Playwright, or correct browser binaries. Installing at runtime wastes 2-5 min per run and is fragile.</td></tr>
+        <tr><td>Pre-configured delegate</td><td>Couples your tests to a specific delegate version. Delegate upgrades can break your tests. Multiple teams sharing delegates means dependency conflicts.</td></tr>
+        <tr><td>Harness Cloud (hosted)</td><td>Good option if available, but you lose control over installed tools and versions. Heavy dependencies like Playwright + Chromium may not be pre-installed.</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>Recommended: Two Docker Images</h3>
+
+  <div class="diagram"><pre>
+┌───────────────────────────────────────────────────────────────────────────┐
+│                      DOCKER IMAGE STRATEGY                                │
+│                                                                           │
+│  ┌──────────────────────────────┐  ┌──────────────────────────────────┐  │
+│  │  e2e-playwright:latest        │  │  e2e-python:latest               │  │
+│  │  ─────────────────────────── │  │  ──────────────────────────────  │  │
+│  │  Base: mcr.microsoft.com/    │  │  Base: python:3.11-slim          │  │
+│  │    playwright:v1.40.0        │  │                                   │  │
+│  │                              │  │  Packages:                        │  │
+│  │  Includes:                   │  │  · boto3, requests, pytest        │  │
+│  │  · Node.js 20               │  │  · pyyaml, jinja2                 │  │
+│  │  · Chromium, Firefox         │  │  · GitPython                      │  │
+│  │  · Playwright + deps         │  │                                   │  │
+│  │  · Test specs (TS)           │  │  System:                          │  │
+│  │                              │  │  · git, curl, jq                  │  │
+│  │  Size: ~1.2 GB               │  │  · AWS CLI v2                     │  │
+│  │  Used by: UI stages          │  │                                   │  │
+│  │                              │  │  Size: ~450 MB                    │  │
+│  └──────────────────────────────┘  │  Used by: all non-UI stages       │  │
+│                                    └──────────────────────────────────┘  │
+│                                                                           │
+│  ⚠ Do NOT create one giant image with both — it would be ~2GB and slow   │
+│    to pull. Keep them separate, keep them lean.                           │
+└───────────────────────────────────────────────────────────────────────────┘</pre></div>
+
+  <h4>Dockerfile: e2e-playwright</h4>
+  <pre><code><span class="lang-label">Dockerfile</span># e2e-playwright/Dockerfile
+FROM mcr.microsoft.com/playwright:v1.40.0-jammy
+
+WORKDIR /e2e
+
+# Install test dependencies
+COPY package.json package-lock.json ./
+RUN npm ci
+
+# Copy test specs and configs
+COPY playwright.config.ts ./
+COPY tests/ ./tests/
+
+# Pre-install browsers (cached in image)
+RUN npx playwright install --with-deps chromium
+
+ENTRYPOINT ["npx", "playwright", "test"]</code></pre>
+
+  <h4>Dockerfile: e2e-python</h4>
+  <pre><code><span class="lang-label">Dockerfile</span># e2e-python/Dockerfile
+FROM python:3.11-slim
+
+# System deps
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    git curl jq unzip \
+    && rm -rf /var/lib/apt/lists/*
+
+# AWS CLI v2
+RUN curl -s "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip" \
+    && unzip -q awscliv2.zip && ./aws/install && rm -rf aws awscliv2.zip
+
+WORKDIR /e2e
+
+# Python deps
+COPY requirements.txt ./
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Copy test scripts
+COPY scripts/ ./scripts/
+COPY pytest.ini ./
+COPY conftest.py ./
+
+ENTRYPOINT ["pytest", "-v", "--tb=short"]</code></pre>
+
+  <h4>requirements.txt</h4>
+  <pre><code><span class="lang-label">Text</span>boto3==1.34.0
+requests==2.31.0
+pytest==7.4.3
+pytest-html==4.1.1
+pyyaml==6.0.1
+GitPython==3.1.40
+jinja2==3.1.2</code></pre>
+
+  <h3>How They're Used in Harness</h3>
+  <pre><code><span class="lang-label">YAML — Harness Pipeline</span>stages:
+  - stage:
+      name: "Cleanup"
+      type: CI
+      spec:
+        execution:
+          steps:
+            - step:
+                name: "Teardown Previous Run"
+                type: Run
+                spec:
+                  connectorRef: docker_registry
+                  image: your-registry/e2e-python:latest
+                  command: python3 scripts/cleanup.py
+
+  - stage:
+      name: "UI Onboarding"
+      type: CI
+      spec:
+        execution:
+          steps:
+            - step:
+                name: "Playwright Onboard Flow"
+                type: Run
+                spec:
+                  connectorRef: docker_registry
+                  image: your-registry/e2e-playwright:latest
+                  command: npx playwright test onboarding.spec.ts
+                  envVariables:
+                    PLATFORM_URL: "https://platform.internal.company.com"
+
+  - stage:
+      name: "Provisioning & Resource Checks"
+      type: CI
+      spec:
+        execution:
+          steps:
+            - step:
+                name: "Poll Provisioning"
+                type: Run
+                spec:
+                  connectorRef: docker_registry
+                  image: your-registry/e2e-python:latest
+                  command: python3 scripts/poll_provisioning.py
+            - step:
+                name: "Verify AWS Resources"
+                type: Run
+                spec:
+                  connectorRef: docker_registry
+                  image: your-registry/e2e-python:latest
+                  command: pytest scripts/verify_aws_resources.py -v
+
+  - stage:
+      name: "Day-2: Add Service via UI"
+      type: CI
+      spec:
+        execution:
+          steps:
+            - step:
+                name: "Add Service UI Flow"
+                type: Run
+                spec:
+                  connectorRef: docker_registry
+                  image: your-registry/e2e-playwright:latest
+                  command: npx playwright test add-service.spec.ts
+            - step:
+                name: "Verify New Resource"
+                type: Run
+                spec:
+                  connectorRef: docker_registry
+                  image: your-registry/e2e-python:latest
+                  command: pytest scripts/verify_additional_service.py -v
+
+  - stage:
+      name: "Day-2: Code Push & CI/CD"
+      type: CI
+      spec:
+        execution:
+          steps:
+            - step:
+                name: "Push Code Change & Trigger CI"
+                type: Run
+                spec:
+                  connectorRef: docker_registry
+                  image: your-registry/e2e-python:latest
+                  command: python3 scripts/day2_code_change.py
+            - step:
+                name: "Validate Full CI/CD Loop"
+                type: Run
+                spec:
+                  connectorRef: docker_registry
+                  image: your-registry/e2e-python:latest
+                  command: python3 scripts/validate_cicd_loop.py</code></pre>
+
+  <h3>CI for the CI: Building & Versioning Test Images</h3>
+  <p>Your E2E test images need their own CI pipeline. When test code changes, rebuild and push the images.</p>
+
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Trigger</th><th>Action</th></tr></thead>
+      <tbody>
+        <tr><td>PR to <code>e2e-tests</code> repo</td><td>Build images, run smoke test (UI loads, boto3 imports)</td></tr>
+        <tr><td>Merge to main</td><td>Build + push <code>:latest</code> and <code>:&lt;sha&gt;</code> tags to registry</td></tr>
+        <tr><td>Weekly</td><td>Rebuild to pick up OS security patches</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>When Docker Is NOT Required</h3>
+  <p>There are cases where containerization adds overhead without enough benefit:</p>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Scenario</th><th>Alternative</th></tr></thead>
+      <tbody>
+        <tr><td>Simple API-only tests (no UI, no AWS SDK)</td><td>Harness <code>ShellScript</code> step with <code>curl</code> + <code>jq</code> is sufficient</td></tr>
+        <tr><td>One-off debugging / manual runs</td><td>Run scripts locally: <code>python3 scripts/verify_aws.py</code></td></tr>
+        <tr><td>Harness Cloud (SaaS) with pre-installed tools</td><td>If the hosted environment has Python + boto3, Docker is optional (but still recommended for reproducibility)</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="callout callout-info">
+    <strong>Bottom Line</strong>
+    <p>Docker containers are the right choice for this E2E suite. Two lean images (Playwright + Python) give you reproducibility, isolation, and portability. The Harness pipeline orchestrates which image runs at each step. You get the best of both worlds: Playwright for what it's great at (UI), Python for what it's great at (everything else), and Docker to make it all reliable.</p>
+  </div>
+</section>
+
+<!-- ════════════════════════ 10. FAILURES ════════════════════════ -->
+<section id="failures">
+  <h2 class="section-title"><span class="num">10</span> Failure Handling & Debugging</h2>
+
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Category</th><th>Example</th><th>Response</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Infra Flake</strong></td><td>Timeout on AWS provisioning</td><td>Auto-retry stage (max 1)</td></tr>
+        <tr><td><strong>True Regression</strong></td><td>Onboarding API returns 500</td><td>Fail pipeline, alert team</td></tr>
+        <tr><td><strong>Test Bug</strong></td><td>UI selector changed</td><td>Fail, fix test, re-run</td></tr>
+        <tr><td><strong>Env Issue</strong></td><td>Harness delegate down</td><td>Fail, alert infra team</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>Debugging Artifacts</h3>
+  <p>Every stage produces: screenshots (UI), API response bodies, pipeline execution IDs, AWS resource ARNs, Git commit SHAs, and timestamps for log correlation.</p>
+
+  <div class="callout callout-success">
+    <strong>Stage 8: Conditional Cleanup</strong>
+    <p>On <strong>SUCCESS</strong>: full teardown. On <strong>FAILURE</strong>: resources preserved for debugging. Manual cleanup via <code>make e2e-cleanup</code>.</p>
+  </div>
+</section>
+
+<!-- ════════════════════════ 8. COVERAGE ════════════════════════ -->
+<section id="coverage">
+  <h2 class="section-title"><span class="num">11</span> Test Coverage Matrix</h2>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Scenario</th><th>Stage</th><th>Priority</th></tr></thead>
+      <tbody>
+        <tr><td>Happy path onboarding via UI</td><td>2</td><td><span class="tag tag-p0">P0</span></td></tr>
+        <tr><td>All requested resources created</td><td>4</td><td><span class="tag tag-p0">P0</span></td></tr>
+        <tr><td>Git repo has correct structure</td><td>4</td><td><span class="tag tag-p0">P0</span></td></tr>
+        <tr><td>All Harness pipelines exist</td><td>4</td><td><span class="tag tag-p0">P0</span></td></tr>
+        <tr><td>Hello-world deploys to dev</td><td>5</td><td><span class="tag tag-p0">P0</span></td></tr>
+        <tr><td>Feature push triggers pipeline</td><td>6</td><td><span class="tag tag-p0">P0</span></td></tr>
+        <tr><td>PR triggers PR pipeline</td><td>6</td><td><span class="tag tag-p0">P0</span></td></tr>
+        <tr><td>PR merge triggers main pipeline</td><td>6</td><td><span class="tag tag-p0">P0</span></td></tr>
+        <tr><td>Deploy to all environments</td><td>7</td><td><span class="tag tag-p0">P0</span></td></tr>
+        <tr><td>Cleanup is idempotent</td><td>1</td><td><span class="tag tag-p1">P1</span></td></tr>
+        <tr><td>Onboarding with single resource</td><td>2</td><td><span class="tag tag-p1">P1</span></td></tr>
+        <tr><td>Pipeline has correct approval gates</td><td>4</td><td><span class="tag tag-p1">P1</span></td></tr>
+        <tr><td>RDS / S3 / DynamoDB connectivity from app</td><td>7</td><td><span class="tag tag-p1">P1</span></td></tr>
+        <tr><td>UI error states (duplicate name)</td><td>2</td><td><span class="tag tag-p2">P2</span></td></tr>
+        <tr><td>Partial provisioning failure recovery</td><td>3</td><td><span class="tag tag-p2">P2</span></td></tr>
+        <tr><td>Rollback on failed deployment</td><td>7</td><td><span class="tag tag-p2">P2</span></td></tr>
+        <tr><td colspan="3" style="background: var(--surface-raised); color: var(--purple); font-weight: 700; font-size: 12px; text-transform: uppercase; letter-spacing: 1px;">Day-2 Operations (Stages 9–12)</td></tr>
+        <tr><td>Add service via UI (additional DynamoDB/S3/SQS)</td><td>9</td><td><span class="tag tag-p0">P0</span></td></tr>
+        <tr><td>New resource provisioned correctly</td><td>9</td><td><span class="tag tag-p0">P0</span></td></tr>
+        <tr><td>Existing resources unaffected after adding service</td><td>9</td><td><span class="tag tag-p0">P0</span></td></tr>
+        <tr><td>Code push with real app change (new endpoint)</td><td>10</td><td><span class="tag tag-p0">P0</span></td></tr>
+        <tr><td>PR pipeline passes for code change</td><td>10</td><td><span class="tag tag-p0">P0</span></td></tr>
+        <tr><td>Merge triggers full CI/CD → deploy to dev</td><td>11</td><td><span class="tag tag-p0">P0</span></td></tr>
+        <tr><td>Deployed version matches merged commit SHA</td><td>11</td><td><span class="tag tag-p1">P1</span></td></tr>
+        <tr><td>App reads from newly provisioned DynamoDB</td><td>12</td><td><span class="tag tag-p0">P0</span></td></tr>
+        <tr><td>Original /health endpoint still works (no regression)</td><td>12</td><td><span class="tag tag-p0">P0</span></td></tr>
+        <tr><td>App writes to S3 / reads from RDS post-change</td><td>12</td><td><span class="tag tag-p1">P1</span></td></tr>
+        <tr><td>CloudWatch logs show no errors post-deploy</td><td>12</td><td><span class="tag tag-p1">P1</span></td></tr>
+        <tr><td>Promote Day-2 change through stg → prod</td><td>11</td><td><span class="tag tag-p1">P1</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- ════════════════════════ 9. METRICS ════════════════════════ -->
+<section id="metrics">
+  <h2 class="section-title"><span class="num">12</span> Success Metrics</h2>
+  <div class="metric-grid">
+    <div class="metric-card">
+      <div class="metric-value">&gt;95%</div>
+      <div class="metric-label">E2E Pass Rate (nightly)</div>
+    </div>
+    <div class="metric-card">
+      <div class="metric-value">&lt;30m</div>
+      <div class="metric-label">Mean Execution Time</div>
+    </div>
+    <div class="metric-card">
+      <div class="metric-value">&lt;24h</div>
+      <div class="metric-label">Time to Detect Regression</div>
+    </div>
+    <div class="metric-card">
+      <div class="metric-value">&lt;5%</div>
+      <div class="metric-label">Flake Rate</div>
+    </div>
+    <div class="metric-card">
+      <div class="metric-value">100%</div>
+      <div class="metric-label">P0 Scenario Coverage</div>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════════════ 10. TOOLS ════════════════════════ -->
+<section id="tools">
+  <h2 class="section-title"><span class="num">13</span> Tooling Summary</h2>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Tool</th><th>Purpose</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Harness</strong></td><td>Test pipeline orchestration + pipeline-under-test verification</td></tr>
+        <tr><td><strong>Playwright</strong></td><td>UI automation and screenshot capture</td></tr>
+        <tr><td><strong>Python (requests / boto3)</strong></td><td>API validation, AWS resource checks, polling</td></tr>
+        <tr><td><strong>Git CLI + GitHub API</strong></td><td>Repo validation, trigger testing (push/PR/merge)</td></tr>
+        <tr><td><strong>AWS CLI / SDK</strong></td><td>Resource verification and cleanup</td></tr>
+        <tr><td><strong>Slack / Email</strong></td><td>Notifications and alerts</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>Schedule & Triggers</h3>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Trigger</th><th>When</th><th>Purpose</th></tr></thead>
+      <tbody>
+        <tr><td>Nightly (cron)</td><td>2:00 AM UTC daily</td><td>Full regression — catches environment drift</td></tr>
+        <tr><td>On platform release</td><td>Merge to main</td><td>Validate no onboarding regressions</td></tr>
+        <tr><td>Manual</td><td>On-demand</td><td>Debugging, pre-release validation</td></tr>
+        <tr><td>Weekly full-scope</td><td>Sunday 6 AM UTC</td><td>Extended run with edge cases and all combos</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- ════════════════════════ 11. ROADMAP ════════════════════════ -->
+<section id="roadmap">
+  <h2 class="section-title"><span class="num">14</span> Implementation Roadmap</h2>
+
+  <div class="timeline">
+    <div class="timeline-item">
+      <div class="phase">PHASE 1 — WEEKS 1–2</div>
+      <div class="phase-title">Foundation</div>
+      <div class="phase-desc">Cleanup stage, API onboarding, basic provisioning wait/poll</div>
+    </div>
+    <div class="timeline-item">
+      <div class="phase">PHASE 2 — WEEKS 3–4</div>
+      <div class="phase-title">Resource Verification</div>
+      <div class="phase-desc">AWS verification scripts, Git repo validation, Harness pipeline checks</div>
+    </div>
+    <div class="timeline-item">
+      <div class="phase">PHASE 3 — WEEKS 5–6</div>
+      <div class="phase-title">Deployment Validation</div>
+      <div class="phase-desc">Hello-world deployment, health checks across all environments</div>
+    </div>
+    <div class="timeline-item">
+      <div class="phase">PHASE 4 — WEEKS 7–8</div>
+      <div class="phase-title">Trigger Testing</div>
+      <div class="phase-desc">Git push / PR / merge trigger validation end-to-end</div>
+    </div>
+    <div class="timeline-item">
+      <div class="phase">PHASE 5 — WEEKS 9–10</div>
+      <div class="phase-title">UI Automation</div>
+      <div class="phase-desc">Playwright onboarding flow, screenshot capture, error state tests</div>
+    </div>
+    <div class="timeline-item">
+      <div class="phase">PHASE 6 — WEEKS 11–12</div>
+      <div class="phase-title">Reporting & Hardening</div>
+      <div class="phase-desc">HTML reports, Slack notifications, retry logic, flake elimination</div>
+    </div>
+  </div>
+</section>
+
+</div>
+
+<footer>
+  <p>E2E Testing Strategy — Developer Platform &nbsp;·&nbsp; Confidential</p>
+</footer>
+
+</body>
+</html>
