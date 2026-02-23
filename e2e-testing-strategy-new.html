@@ -1,0 +1,586 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>E2E Testing Strategy — Developer Platform</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,500;0,700&family=JetBrains+Mono:wght@400;500&family=Fraunces:wght@700;900&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0e1117; --surface: #161b22; --raised: #1c2129; --sidebar-bg: #0d1015;
+  --border: #30363d; --text: #e6edf3; --muted: #8b949e;
+  --accent: #58a6ff; --accent-dim: #1f3a5f;
+  --green: #3fb950; --green-dim: #1a3a2a;
+  --orange: #d29922; --orange-dim: #3d2e00;
+  --red: #f85149; --red-dim: #3d1418;
+  --purple: #bc8cff; --purple-dim: #2d1f4e;
+  --cyan: #39d2c0; --yellow: #e3b341; --yellow-dim: #3b2e00;
+  --r: 10px;
+  --body: 'DM Sans', sans-serif; --display: 'Fraunces', serif; --mono: 'JetBrains Mono', monospace;
+  --sw: 272px;
+}
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+html { scroll-behavior: smooth; scroll-padding-top: 24px; }
+body { font-family: var(--body); background: var(--bg); color: var(--text); line-height: 1.72; font-size: 14.5px; -webkit-font-smoothing: antialiased; }
+
+/* SIDEBAR */
+.sidebar { position: fixed; top: 0; left: 0; width: var(--sw); height: 100vh; background: var(--sidebar-bg); border-right: 1px solid var(--border); overflow-y: auto; z-index: 100; padding: 24px 0; scrollbar-width: thin; scrollbar-color: var(--border) transparent; }
+.sidebar-hdr { padding: 0 20px 18px; border-bottom: 1px solid var(--border); margin-bottom: 12px; }
+.sidebar-hdr .logo { font-family: var(--display); font-weight: 900; font-size: 15px; line-height: 1.3; }
+.sidebar-hdr .sub { font-size: 11px; color: var(--muted); margin-top: 3px; }
+.sg { padding: 0 10px; margin-bottom: 6px; }
+.sg-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 1.2px; color: var(--muted); padding: 10px 10px 5px; }
+.sidebar a { display: flex; align-items: center; gap: 9px; padding: 6px 10px; border-radius: 6px; text-decoration: none; color: var(--muted); font-size: 12.5px; font-weight: 500; transition: all .15s; line-height: 1.35; }
+.sidebar a:hover { background: rgba(88,166,255,.08); color: var(--text); }
+.sidebar a .n { font-family: var(--mono); font-size: 10px; color: var(--accent); min-width: 20px; flex-shrink: 0; }
+
+/* MAIN */
+.main { margin-left: var(--sw); min-height: 100vh; }
+.hero { position: relative; padding: 56px 44px 42px; overflow: hidden; background: linear-gradient(135deg, #0d1520, var(--bg) 60%, #10151f); border-bottom: 1px solid var(--border); }
+.hero::before { content: ''; position: absolute; inset: 0; background: radial-gradient(ellipse at 30% 20%, rgba(88,166,255,.07), transparent 60%), radial-gradient(ellipse at 70% 80%, rgba(188,140,255,.04), transparent 50%); pointer-events: none; }
+.hero-badge { display: inline-block; padding: 4px 13px; border-radius: 14px; border: 1px solid var(--accent-dim); color: var(--accent); font-size: 10px; font-weight: 600; letter-spacing: 1.5px; text-transform: uppercase; margin-bottom: 18px; position: relative; }
+.hero h1 { font-family: var(--display); font-weight: 900; font-size: clamp(1.7rem, 3.5vw, 2.6rem); line-height: 1.15; letter-spacing: -.02em; position: relative; max-width: 600px; }
+.hero p { color: var(--muted); font-size: 15px; max-width: 560px; position: relative; margin-top: 10px; }
+
+.content { max-width: 880px; padding: 0 44px 72px; }
+section { padding: 44px 0 20px; }
+section + section { border-top: 1px solid var(--border); }
+h2.st { font-family: var(--display); font-weight: 700; font-size: 22px; margin-bottom: 6px; display: flex; align-items: center; gap: 11px; }
+h2.st .num { font-family: var(--mono); font-size: 11px; color: var(--accent); background: var(--accent-dim); padding: 3px 8px; border-radius: 5px; font-weight: 500; }
+h3 { font-size: 16px; font-weight: 700; margin: 26px 0 9px; }
+h4 { font-size: 14px; font-weight: 700; margin: 20px 0 7px; color: var(--purple); }
+p { margin-bottom: 13px; }
+
+/* ARCH DIAGRAMS */
+.arch { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r); padding: 28px 20px; margin: 18px 0 22px; overflow-x: auto; }
+.arch-label { font-family: var(--mono); font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 14px; text-align: center; }
+.arch-layers { display: flex; flex-direction: column; gap: 10px; min-width: 720px; }
+.arch-row { display: flex; align-items: center; justify-content: center; gap: 5px; }
+.ab { padding: 9px 12px; border-radius: 7px; font-size: 11.5px; font-weight: 600; text-align: center; min-width: 100px; line-height: 1.3; flex-shrink: 0; }
+.ab.stg { background: linear-gradient(135deg, #2a2517, #1e1b10); border: 1px solid #4a3d1e; color: var(--yellow); }
+.ab.tl { background: linear-gradient(135deg, #162640, #111d30); border: 1px solid #254675; color: var(--accent); }
+.ab.vl { background: linear-gradient(135deg, #1a2a3d, #141e2e); border: 1px solid #2a4060; color: #a0c4e8; font-weight: 500; font-size: 10.5px; min-width: 115px; text-align: left; padding: 9px 11px; }
+.ab.orc { background: linear-gradient(135deg, #2d1f4e, #1e1535); border: 1px solid #5b3fa0; color: var(--purple); }
+.ab.stp { background: linear-gradient(135deg, #1a2e1a, #141e14); border: 1px solid #2a5a2a; color: var(--green); }
+.ab.dim { opacity: .5; }
+.arr { color: var(--muted); font-size: 15px; flex-shrink: 0; opacity: .45; }
+.arr-d { text-align: center; color: var(--muted); font-size: 12px; opacity: .35; padding: 1px 0; }
+.sl { font-family: var(--mono); font-size: 9.5px; letter-spacing: 1px; text-transform: uppercase; padding: 3px 9px; border-radius: 4px; display: inline-block; margin-bottom: 6px; }
+.sl.g { background: var(--green-dim); color: var(--green); }
+.sl.y { background: var(--yellow-dim); color: var(--yellow); }
+.sl.b { background: var(--accent-dim); color: var(--accent); }
+
+/* TABLES */
+.tw { overflow-x: auto; margin: 12px 0 18px; border-radius: var(--r); border: 1px solid var(--border); }
+table { width: 100%; border-collapse: collapse; font-size: 13px; }
+thead th { background: var(--raised); padding: 9px 13px; text-align: left; font-weight: 600; font-size: 10.5px; text-transform: uppercase; letter-spacing: .8px; color: var(--muted); border-bottom: 1px solid var(--border); white-space: nowrap; }
+tbody td { padding: 8px 13px; border-bottom: 1px solid var(--border); vertical-align: top; }
+tbody tr:last-child td { border-bottom: none; }
+tbody tr:hover { background: rgba(88,166,255,.025); }
+td.gh { background: var(--raised); color: var(--purple); font-weight: 700; font-size: 10.5px; text-transform: uppercase; letter-spacing: 1px; padding: 7px 13px; }
+
+/* CODE */
+pre { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r); padding: 16px 20px; overflow-x: auto; margin: 12px 0 18px; position: relative; }
+pre code { font-family: var(--mono); font-size: 12px; line-height: 1.6; color: var(--text); }
+code { font-family: var(--mono); font-size: 12px; background: var(--raised); padding: 2px 5px; border-radius: 4px; color: var(--cyan); }
+pre code { background: none; padding: 0; }
+.ll { position: absolute; top: 7px; right: 11px; font-family: var(--mono); font-size: 9px; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; opacity: .45; }
+
+/* TAGS */
+.tag { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 10.5px; font-weight: 600; }
+.tag-p0 { background: var(--red-dim); color: var(--red); }
+.tag-p1 { background: var(--orange-dim); color: var(--orange); }
+.tag-p2 { background: var(--purple-dim); color: var(--purple); }
+.tag-h { background: var(--red-dim); color: var(--red); }
+.tag-m { background: var(--orange-dim); color: var(--orange); }
+.tag-l { background: var(--green-dim); color: var(--green); }
+
+/* CALLOUTS */
+.co { border-radius: var(--r); padding: 16px 20px; margin: 16px 0; border-left: 3px solid; }
+.co-i { background: rgba(88,166,255,.06); border-left-color: var(--accent); }
+.co-w { background: rgba(210,153,34,.06); border-left-color: var(--orange); }
+.co-s { background: rgba(63,185,80,.06); border-left-color: var(--green); }
+.co strong { display: block; margin-bottom: 3px; font-size: 11.5px; text-transform: uppercase; letter-spacing: .5px; }
+.co p { margin-bottom: 0; font-size: 13px; }
+
+/* METRICS */
+.mg { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 14px; margin: 18px 0; }
+.mc { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r); padding: 16px 14px; transition: border-color .2s; }
+.mc:hover { border-color: var(--accent); }
+.mc .ml { font-size: 12px; color: var(--muted); font-weight: 500; margin-bottom: 10px; }
+.mt { display: flex; flex-direction: column; gap: 3px; font-size: 11px; }
+.mt-r { display: flex; align-items: center; gap: 7px; }
+.mt-bar { height: 3.5px; border-radius: 2px; flex: 1; }
+.mt-v { min-width: 34px; font-family: var(--mono); font-size: 10.5px; }
+.mt-desc { font-size: 9.5px; color: var(--muted); padding-left: 56px; margin-bottom: 2px; }
+
+/* TIMELINE */
+.tl-wrap { position: relative; padding-left: 30px; margin: 18px 0; }
+.tl-wrap::before { content: ''; position: absolute; left: 9px; top: 7px; bottom: 7px; width: 2px; background: var(--border); }
+.tl-item { position: relative; margin-bottom: 20px; }
+.tl-item::before { content: ''; position: absolute; left: -25px; top: 6px; width: 8px; height: 8px; border-radius: 50%; background: var(--accent); border: 2px solid var(--bg); }
+.tl-item .ph { font-family: var(--mono); font-size: 10.5px; color: var(--accent); letter-spacing: .5px; }
+.tl-item .pt { font-weight: 700; font-size: 14px; margin-bottom: 2px; }
+.tl-item .pd { color: var(--muted); font-size: 12.5px; }
+
+/* DIAGRAM BOX */
+.dg { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r); padding: 22px; margin: 16px 0; overflow-x: auto; }
+.dg pre { font-family: var(--mono); font-size: 11.5px; line-height: 1.5; color: var(--muted); white-space: pre; background: none; border: none; padding: 0; margin: 0; }
+
+footer { text-align: center; padding: 36px 0; color: var(--muted); font-size: 11px; border-top: 1px solid var(--border); margin-top: 36px; }
+@media (max-width: 900px) { .sidebar { display: none; } .main { margin-left: 0; } .content { padding: 0 18px 56px; } .hero { padding: 36px 18px 28px; } footer { margin-left: 0; } }
+@media print { .sidebar { display: none; } .main { margin-left: 0; } body { background: #fff; color: #111; font-size: 11pt; } .hero { background: none; border-bottom: 2px solid #111; } .hero h1 { color: #111; } footer { margin-left: 0; } }
+</style>
+</head>
+<body>
+
+<nav class="sidebar">
+  <div class="sidebar-hdr"><div class="logo">E2E Testing<br>Strategy</div><div class="sub">Developer Platform</div></div>
+  <div class="sg"><div class="sg-label">Overview</div>
+    <a href="#arch"><span class="n">01</span> System Architecture</a>
+    <a href="#philosophy"><span class="n">02</span> Testing Philosophy</a>
+    <a href="#data"><span class="n">03</span> Test Data Strategy</a>
+  </div>
+  <div class="sg"><div class="sg-label">Pipeline Architecture</div>
+    <a href="#orchestrator"><span class="n">04</span> Orchestrator Pipeline</a>
+    <a href="#pl-onboard"><span class="n">05</span> Pipeline: Onboarding E2E</a>
+    <a href="#pl-day2"><span class="n">06</span> Pipeline: Day-2 CI/CD</a>
+  </div>
+  <div class="sg"><div class="sg-label">Implementation</div>
+    <a href="#lang"><span class="n">07</span> Language Strategy</a>
+    <a href="#docker"><span class="n">08</span> Docker Containerization</a>
+    <a href="#failures"><span class="n">09</span> Failure Handling</a>
+  </div>
+  <div class="sg"><div class="sg-label">Measurement</div>
+    <a href="#coverage"><span class="n">10</span> Test Coverage Matrix</a>
+    <a href="#metrics"><span class="n">11</span> Success Metrics</a>
+  </div>
+  <div class="sg"><div class="sg-label">Planning</div>
+    <a href="#tools"><span class="n">12</span> Tooling &amp; Schedule</a>
+    <a href="#roadmap"><span class="n">13</span> Implementation Roadmap</a>
+  </div>
+</nav>
+
+<div class="main">
+<header class="hero">
+  <div class="hero-badge">Strategy Document</div>
+  <h1>End-to-End Testing Strategy</h1>
+  <p>Developer Platform — UI Onboarding, Resource Provisioning, CI/CD Pipeline &amp; Multi-Environment Deployment Validation</p>
+</header>
+<div class="content">
+
+<!-- 01 ARCH -->
+<section id="arch">
+  <h2 class="st"><span class="num">01</span> System Architecture</h2>
+  <p>The platform enables developers to onboard via self-service UI, provisioning a complete environment — Git repo, CI/CD pipelines, AWS accounts, and cloud resources.</p>
+  <div class="dg"><pre>┌─────────────────────────────────────────────────────────────────────────┐
+│                       DEVELOPER PLATFORM                                 │
+│  ┌──────────┐   ┌────────────┐   ┌────────────────────────────────┐    │
+│  │  UI App  │──▶│  Platform  │──▶│  Provisioning Engine           │    │
+│  │· View Pg │   │  APIs      │   │  ┌────────┐  ┌─────────────┐  │    │
+│  │· Onboard │   │· Onboard  │   │  │Git Repo│  │AWS Accounts │  │    │
+│  │  Page    │   │· Status   │   │  │+ Hello │  │· RDS  · S3  │  │    │
+│  └──────────┘   └────────────┘   │  │  World │  │· DynamoDB   │  │    │
+│                                   │  └────────┘  │· μService  │  │    │
+│                                   │              └─────────────┘  │    │
+│                                   └────────────────────────────────┘    │
+│  ┌──────────────────────────────────────────────────────────────────┐   │
+│  │  Harness Pipelines (Auto-generated per customer)                 │   │
+│  │  [PR Build] [Feature Branch] [Main Build] [Rel STG] [Rel PROD]  │   │
+│  └──────────────────────────────────────────────────────────────────┘   │
+└─────────────────────────────────────────────────────────────────────────┘</pre></div>
+  <div class="tw"><table><thead><tr><th>Asset</th><th>Description</th></tr></thead><tbody>
+    <tr><td><strong>Git Repository</strong></td><td>Hello-world app, Dockerfile, build configs</td></tr>
+    <tr><td><strong>Harness Pipelines</strong></td><td>PR, feature branch, main, release-STG, release-PROD triggers</td></tr>
+    <tr><td><strong>AWS Accounts</strong></td><td>Dev, Test, Staging, Production</td></tr>
+    <tr><td><strong>AWS Resources</strong></td><td>Any combination: Microservice, RDS, S3, DynamoDB</td></tr>
+  </tbody></table></div>
+</section>
+
+<!-- 02 PHILOSOPHY -->
+<section id="philosophy">
+  <h2 class="st"><span class="num">02</span> Testing Philosophy</h2>
+  <div class="co co-i"><strong>Core Principle</strong><p>Test the real thing. No mocks at E2E level. Every run starts with cleanup, stages are observable, failures are gated. Pipelines are modular and composable via an orchestrator.</p></div>
+  <div class="tw"><table><thead><tr><th>Layer</th><th>What We Test</th><th>Tool</th></tr></thead><tbody>
+    <tr><td>UI</td><td>Onboarding form, navigation, add-service, release UI</td><td>Playwright</td></tr>
+    <tr><td>API</td><td>Onboarding, status polling, provisioning</td><td>Python (requests)</td></tr>
+    <tr><td>Git</td><td>Repo creation, code push, PR/merge triggers</td><td>Python (subprocess/GitPython)</td></tr>
+    <tr><td>Harness</td><td>Pipeline existence, trigger validation, execution</td><td>Python (Harness API)</td></tr>
+    <tr><td>AWS</td><td>RDS, S3, DynamoDB, ECS/EKS, accounts</td><td>Python (boto3)</td></tr>
+    <tr><td>Deploy</td><td>Health checks, version validation, all envs</td><td>Python (requests)</td></tr>
+  </tbody></table></div>
+</section>
+
+<!-- 03 DATA -->
+<section id="data">
+  <h2 class="st"><span class="num">03</span> Test Data Strategy</h2>
+  <pre><code><span class="ll">YAML</span>test_user:
+  name: "e2e-test-platform-user"
+  email: "e2e-test@internal.company.com"
+test_project:
+  name: "e2e-test-project-001"
+  resources: [microservice, rds, s3, dynamodb]</code></pre>
+  <p>All artifacts use <code>e2e-test-*</code> namespace. AWS resources tagged <code>Environment: e2e-test</code>. Never shared with manual testing.</p>
+  <div class="co co-w"><strong>Cleanup-First Pattern</strong><p>Every run begins by tearing down previous artifacts. No stale state, same data reusable, partial failures don't block.</p></div>
+</section>
+
+<!-- 04 ORCHESTRATOR -->
+<section id="orchestrator">
+  <h2 class="st"><span class="num">04</span> Orchestrator Pipeline Architecture</h2>
+  <p>Instead of one monolithic pipeline, the suite is <strong>independent, modular pipelines</strong> — each a complete test scenario. A single <strong>Orchestrator Pipeline</strong> selects which child pipelines to run via Harness Input Sets.</p>
+  <div class="co co-i"><strong>Why This Pattern?</strong><p>Run onboarding-only for onboarding changes. Day-2 only for CI/CD changes. Everything for nightly regression. Add new scenarios without touching existing pipelines.</p></div>
+
+  <div class="arch">
+    <div class="arch-label">Orchestrator — "Run E2E Suite"</div>
+    <div class="arch-layers">
+      <div class="arch-row">
+        <div class="ab orc" style="min-width:560px"><div style="font-size:12.5px;margin-bottom:5px">🎛 E2E Orchestrator Pipeline</div><div style="font-size:10px;font-weight:400;color:#d4bfff">Input: select which test pipelines to run · Configurable via Harness Input Sets</div></div>
+      </div>
+      <div class="arr-d">▼ triggers selected pipelines ▼</div>
+      <div class="arch-row" style="gap:14px">
+        <div class="ab stg" style="min-width:240px"><div style="margin-bottom:3px">Pipeline 1: Onboarding E2E</div><div style="font-size:9.5px;font-weight:400;color:#c9a84e">Setup → UI Onboard → Validate → Deploy → STG → PROD</div></div>
+        <div class="ab stg" style="min-width:240px"><div style="margin-bottom:3px">Pipeline 2: Day-2 CI/CD E2E</div><div style="font-size:9.5px;font-weight:400;color:#c9a84e">Setup → Update Code → Deploy → STG → PROD</div></div>
+      </div>
+      <div class="arr-d">+ extensible</div>
+      <div class="arch-row" style="gap:14px">
+        <div class="ab tl dim" style="min-width:155px">Pipeline 3: Add Service</div>
+        <div class="ab tl dim" style="min-width:155px">Pipeline 4: Rollback</div>
+        <div class="ab tl dim" style="min-width:155px">Pipeline N: Custom</div>
+      </div>
+    </div>
+  </div>
+
+  <h3>Orchestrator Configuration</h3>
+  <pre><code><span class="ll">YAML — Harness</span>pipeline:
+  name: "E2E Test Suite Orchestrator"
+  identifier: e2e_orchestrator
+  stages:
+    - stage:
+        name: "Run Onboarding E2E"
+        type: Pipeline
+        spec:
+          org: platform_team
+          pipeline: e2e_onboarding_pipeline
+        when:
+          condition: "&lt;+pipeline.variables.run_onboarding&gt;" == "true"
+    - stage:
+        name: "Run Day-2 CI/CD E2E"
+        type: Pipeline
+        spec:
+          org: platform_team
+          pipeline: e2e_day2_cicd_pipeline
+        when:
+          condition: "&lt;+pipeline.variables.run_day2_cicd&gt;" == "true"
+  variables:
+    - name: run_onboarding
+      type: String
+      default: "true"
+    - name: run_day2_cicd
+      type: String
+      default: "true"</code></pre>
+
+  <div class="tw"><table><thead><tr><th>Mode</th><th>What Runs</th><th>When</th></tr></thead><tbody>
+    <tr><td><strong>Full Regression</strong></td><td>All pipelines</td><td>Nightly, weekly</td></tr>
+    <tr><td><strong>Onboarding Only</strong></td><td>Pipeline 1</td><td>Onboarding code changes</td></tr>
+    <tr><td><strong>CI/CD Only</strong></td><td>Pipeline 2</td><td>Pipeline/trigger changes</td></tr>
+    <tr><td><strong>Selective</strong></td><td>Any combination</td><td>Manual / debugging</td></tr>
+  </tbody></table></div>
+</section>
+
+<!-- 05 ONBOARDING PIPELINE -->
+<section id="pl-onboard">
+  <h2 class="st"><span class="num">05</span> Pipeline 1: Onboarding E2E</h2>
+  <p>Validates complete first-time onboarding: UI form → provisioning → artifact validation → deployment to all environments.</p>
+  <div class="arch">
+    <div class="arch-label">Pipeline 1 — Onboarding E2E</div>
+    <div class="arch-layers">
+      <div style="text-align:center"><span class="sl g">Test Genie (Docker Containers)</span></div>
+      <div class="arch-row">
+        <div class="ab tl" style="min-width:85px">Playwright</div><div style="width:12px"></div>
+        <div class="ab tl">Playwright +<br>Python</div><div style="width:12px"></div>
+        <div class="ab tl">Playwright +<br>Python</div><div style="width:12px"></div>
+        <div class="ab tl">Playwright +<br>Python</div><div style="width:12px"></div>
+        <div class="ab tl">Playwright +<br>Python</div>
+      </div>
+      <div class="arr-d">↕ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ↕ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ↕ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ↕ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ↕</div>
+      <div style="text-align:center"><span class="sl y">Harness Stages</span></div>
+      <div class="arch-row">
+        <div class="ab stp">Setup</div><div class="arr">→</div>
+        <div class="ab stg">UI<br>Onboarding</div><div class="arr">→</div>
+        <div class="ab stg">Validate<br>Artifacts</div><div class="arr">→</div>
+        <div class="ab stg">Deploy to<br>DEV &amp; TEST</div><div class="arr">→</div>
+        <div class="ab stg">Release to<br>STG</div><div class="arr">→</div>
+        <div class="ab stg">Release to<br>PROD</div>
+      </div>
+      <div class="arr-d">↕ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ↕ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ↕ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ↕ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ↕</div>
+      <div style="text-align:center"><span class="sl b">Validation Items</span></div>
+      <div class="arch-row" style="align-items:flex-start">
+        <div class="ab vl" style="min-width:85px">—</div><div style="width:12px"></div>
+        <div class="ab vl">1. UI Flow<br>2. Workflow</div><div style="width:12px"></div>
+        <div class="ab vl">1. Git Repo<br>2. Pipelines<br>3. Triggers<br>4. Catalog<br>5. AWS Resources</div><div style="width:12px"></div>
+        <div class="ab vl">1. Pipeline Trigger<br>2. New Service<br>&nbsp;&nbsp;&nbsp;Validation</div><div style="width:12px"></div>
+        <div class="ab vl">1. UI Flow<br>2. Stage Pipeline<br>3. Stage Service<br>&nbsp;&nbsp;&nbsp;Validation</div><div style="width:12px"></div>
+        <div class="ab vl">1. UI Flow<br>2. Stage Pipeline<br>3. Stage Service<br>&nbsp;&nbsp;&nbsp;Validation</div>
+      </div>
+    </div>
+  </div>
+  <div class="tw"><table><thead><tr><th>Stage</th><th>Actions</th><th>Test Genie</th><th>Validations</th></tr></thead><tbody>
+    <tr><td><strong>Setup</strong></td><td>Delete Git repo, Harness pipelines, AWS resources (tagged e2e-test), platform project</td><td>Playwright</td><td>Cleanup idempotent</td></tr>
+    <tr><td><strong>UI Onboarding</strong></td><td>View page → Onboard page → fill form → submit → capture request ID</td><td>Playwright</td><td>1. UI Flow<br>2. Workflow</td></tr>
+    <tr><td><strong>Validate Artifacts</strong></td><td>Poll provisioning → verify Git repo → Harness pipelines → AWS resources</td><td>Playwright + Python</td><td>1. Git Repo 2. Pipelines 3. Triggers 4. Catalog 5. AWS Resources</td></tr>
+    <tr><td><strong>Deploy DEV &amp; TEST</strong></td><td>Trigger main pipeline → validate hello-world → test trigger via code push</td><td>Playwright + Python</td><td>1. Pipeline Trigger<br>2. New Service Validation</td></tr>
+    <tr><td><strong>Release STG</strong></td><td>Trigger STG pipeline → auto-approve → validate</td><td>Playwright + Python</td><td>1. UI Flow 2. Stage Pipeline 3. Stage Service Validation</td></tr>
+    <tr><td><strong>Release PROD</strong></td><td>Trigger PROD pipeline → auto-approve → validate</td><td>Playwright + Python</td><td>1. UI Flow 2. Stage Pipeline 3. Stage Service Validation</td></tr>
+  </tbody></table></div>
+  <h3>Sample: UI Onboarding (Playwright)</h3>
+  <pre><code><span class="ll">TypeScript</span>test('Developer onboarding', async ({ page }) => {
+  await page.goto(process.env.PLATFORM_URL!);
+  await page.click('[data-testid="onboard-cta"]');
+  await page.fill('[data-testid="project-name"]', 'e2e-test-project-001');
+  await page.check('[data-testid="resource-microservice"]');
+  await page.check('[data-testid="resource-rds"]');
+  await page.check('[data-testid="resource-s3"]');
+  await page.check('[data-testid="resource-dynamodb"]');
+  await page.click('[data-testid="submit-onboard"]');
+  const reqId = await page.locator('[data-testid="request-id"]').textContent();
+});</code></pre>
+</section>
+
+<!-- 06 DAY-2 PIPELINE -->
+<section id="pl-day2">
+  <h2 class="st"><span class="num">06</span> Pipeline 2: Day-2 CI/CD E2E</h2>
+  <p>Validates post-onboarding workflow: updating code, pushing to Git, triggering CI/CD, deploying through all environments.</p>
+  <div class="arch">
+    <div class="arch-label">Pipeline 2 — Day-2 CI/CD E2E</div>
+    <div class="arch-layers">
+      <div style="text-align:center"><span class="sl g">Test Genie (Docker Containers)</span></div>
+      <div class="arch-row">
+        <div class="ab tl">Playwright +<br>Python</div><div style="width:12px"></div>
+        <div class="ab tl">Playwright +<br>Python</div><div style="width:12px"></div>
+        <div class="ab tl">Playwright +<br>Python</div><div style="width:12px"></div>
+        <div class="ab tl">Playwright +<br>Python</div><div style="width:12px"></div>
+        <div class="ab tl">Playwright +<br>Python</div>
+      </div>
+      <div class="arr-d">↕ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ↕ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ↕ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ↕ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ↕</div>
+      <div style="text-align:center"><span class="sl y">Harness Stages</span></div>
+      <div class="arch-row">
+        <div class="ab stp">Setup</div><div class="arr">→</div>
+        <div class="ab stg">Update<br>Code</div><div class="arr">→</div>
+        <div class="ab stg">Deploy to<br>DEV &amp; TEST</div><div class="arr">→</div>
+        <div class="ab stg">Release to<br>STG</div><div class="arr">→</div>
+        <div class="ab stg">Release to<br>PROD</div>
+      </div>
+      <div class="arr-d">↕ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ↕ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ↕ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ↕ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ↕</div>
+      <div style="text-align:center"><span class="sl b">Validation Items</span></div>
+      <div class="arch-row" style="align-items:flex-start">
+        <div class="ab vl">1. UI Flow<br>2. Workflow</div><div style="width:12px"></div>
+        <div class="ab vl">1. UI Flow<br>2. Workflow</div><div style="width:12px"></div>
+        <div class="ab vl">1. Pipeline Trigger<br>2. New Service<br>&nbsp;&nbsp;&nbsp;Validation</div><div style="width:12px"></div>
+        <div class="ab vl">1. UI Flow<br>2. Stage Pipeline<br>3. Stage Service<br>&nbsp;&nbsp;&nbsp;Validation</div><div style="width:12px"></div>
+        <div class="ab vl">1. UI Flow<br>2. Stage Pipeline<br>3. Stage Service<br>&nbsp;&nbsp;&nbsp;Validation</div>
+      </div>
+    </div>
+  </div>
+  <div class="tw"><table><thead><tr><th>Stage</th><th>Actions</th><th>Validations</th></tr></thead><tbody>
+    <tr><td><strong>Setup</strong></td><td>Verify project healthy, reset Day-2 artifacts</td><td>UI Flow, Workflow (project Active)</td></tr>
+    <tr><td><strong>Update Code</strong></td><td>Clone → branch → modify app (add /orders) → push → PR → merge</td><td>UI Flow, Workflow (push, PR pass, merge)</td></tr>
+    <tr><td><strong>Deploy DEV &amp; TEST</strong></td><td>Merge triggers main pipeline → build → deploy → verify</td><td>Pipeline Trigger, New Service Validation</td></tr>
+    <tr><td><strong>Release STG</strong></td><td>Trigger STG release → approve → validate</td><td>UI Flow, Stage Pipeline, Stage Service Validation</td></tr>
+    <tr><td><strong>Release PROD</strong></td><td>Trigger PROD release → approve → validate</td><td>UI Flow, Stage Pipeline, Stage Service Validation</td></tr>
+  </tbody></table></div>
+  <h3>Sample: Update Code (Python)</h3>
+  <pre><code><span class="ll">Python</span>def update_code_and_push():
+    work_dir = tempfile.mkdtemp(prefix="e2e-")
+    subprocess.run(["git", "clone", repo_url, work_dir], check=True)
+    subprocess.run(["git", "checkout", "-b", "feature/e2e-add-orders"], cwd=work_dir, check=True)
+
+    # Add /orders endpoint using DynamoDB
+    with open(f"{work_dir}/src/app.py", "a") as f:
+        f.write("""
+@app.route('/orders', methods=['GET'])
+def get_orders():
+    table = boto3.resource('dynamodb').Table(os.environ['ORDERS_TABLE'])
+    return jsonify({"orders": table.scan(Limit=10).get('Items', [])})
+""")
+    subprocess.run(["git", "add", "."], cwd=work_dir, check=True)
+    subprocess.run(["git", "commit", "-m", "feat: add orders [e2e]"], cwd=work_dir, check=True)
+    subprocess.run(["git", "push", "origin", "feature/e2e-add-orders"], cwd=work_dir, check=True)
+    # Then: create PR via GitHub API, wait for PR pipeline, merge</code></pre>
+</section>
+
+<!-- 07 LANGUAGE -->
+<section id="lang">
+  <h2 class="st"><span class="num">07</span> Language Strategy</h2>
+  <div class="co co-w"><strong>Recommendation</strong><p><strong>Playwright (TS) for UI + Python for everything else.</strong> All-Playwright is possible but painful for git, AWS, and polling.</p></div>
+  <div class="tw"><table><thead><tr><th>Task</th><th>Playwright</th><th>Python</th><th>Verdict</th></tr></thead><tbody>
+    <tr><td><strong>UI Interactions</strong></td><td><span class="tag tag-l">Excellent</span></td><td>Possible (bindings)</td><td style="color:var(--accent)">→ Playwright</td></tr>
+    <tr><td><strong>Git Operations</strong></td><td>Awkward (child_process)</td><td><span class="tag tag-l">Natural</span></td><td style="color:var(--green)">→ Python</td></tr>
+    <tr><td><strong>REST API Calls</strong></td><td>Good (fetch)</td><td><span class="tag tag-l">Excellent</span></td><td style="color:var(--green)">→ Python</td></tr>
+    <tr><td><strong>AWS Validation</strong></td><td>Possible (JS SDK)</td><td><span class="tag tag-l">Excellent</span> (boto3)</td><td style="color:var(--green)">→ Python</td></tr>
+    <tr><td><strong>Polling/Waiting</strong></td><td>Timeout conflicts</td><td><span class="tag tag-l">Simple</span></td><td style="color:var(--green)">→ Python</td></tr>
+  </tbody></table></div>
+  <p><strong>Why not all-Playwright?</strong> Timeout hell (30s default vs 15min AWS polling), poor error context (stderr vs boto3 ClientError), dependency bloat (~2GB image).</p>
+  <div class="co co-i"><strong>Python-Only Teams</strong><p>Playwright has Python bindings — viable single-language option, but TS bindings have better docs and faster updates.</p></div>
+</section>
+
+<!-- 08 DOCKER -->
+<section id="docker">
+  <h2 class="st"><span class="num">08</span> Docker Containerization</h2>
+  <div class="co co-s"><strong>Verdict: Yes, use Docker. Two lean images.</strong><p>Reproducibility, isolation, native Harness CI support. Don't run on bare delegates.</p></div>
+  <div class="dg"><pre>┌───────────────────────────┐  ┌────────────────────────────────┐
+│  e2e-playwright:latest     │  │  e2e-python:latest             │
+│  ────────────────────────  │  │  ────────────────────────────  │
+│  Base: playwright:v1.40.0  │  │  Base: python:3.11-slim        │
+│  Node.js 20, Chromium      │  │  boto3, requests, pytest       │
+│  Test specs (TS)           │  │  GitPython, pyyaml, AWS CLI    │
+│  Size: ~1.2 GB             │  │  git, curl, jq                 │
+│  → UI stages               │  │  Size: ~450 MB                 │
+└───────────────────────────┘  │  → All non-UI stages            │
+                               └────────────────────────────────┘
+⚠ Do NOT combine into one ~2GB image.</pre></div>
+  <div class="tw"><table><thead><tr><th>Benefit</th><th>Why It Matters</th></tr></thead><tbody>
+    <tr><td><strong>Reproducibility</strong></td><td>Same browser binaries, same boto3 version, every run</td></tr>
+    <tr><td><strong>Isolation</strong></td><td>Clean filesystem — no stale git creds or AWS caches</td></tr>
+    <tr><td><strong>Harness Native</strong></td><td>Run steps support Docker images directly</td></tr>
+    <tr><td><strong>Portability</strong></td><td>Works locally, Harness, GitHub Actions — no lock-in</td></tr>
+  </tbody></table></div>
+</section>
+
+<!-- 09 FAILURES -->
+<section id="failures">
+  <h2 class="st"><span class="num">09</span> Failure Handling</h2>
+  <div class="tw"><table><thead><tr><th>Category</th><th>Example</th><th>Response</th></tr></thead><tbody>
+    <tr><td><strong>Infra Flake</strong></td><td>AWS provisioning timeout</td><td>Auto-retry (max 1)</td></tr>
+    <tr><td><strong>True Regression</strong></td><td>Onboarding API 500</td><td>Fail, alert team</td></tr>
+    <tr><td><strong>Test Bug</strong></td><td>UI selector changed</td><td>Fail, fix test</td></tr>
+    <tr><td><strong>Env Issue</strong></td><td>Delegate down</td><td>Fail, alert infra</td></tr>
+  </tbody></table></div>
+  <p>Every stage produces: screenshots, API responses, pipeline execution IDs, AWS ARNs, Git SHAs, timestamps.</p>
+  <div class="co co-s"><strong>Conditional Cleanup</strong><p>SUCCESS → full teardown. FAILURE → resources preserved for debugging. Manual: <code>make e2e-cleanup</code>.</p></div>
+</section>
+
+<!-- 10 COVERAGE -->
+<section id="coverage">
+  <h2 class="st"><span class="num">10</span> Test Coverage Matrix</h2>
+  <div class="tw"><table><thead><tr><th>Scenario</th><th>Pipeline</th><th>Stage</th><th>Priority</th></tr></thead><tbody>
+    <tr><td colspan="4" class="gh">Onboarding E2E (Pipeline 1)</td></tr>
+    <tr><td>Happy path onboarding via UI</td><td>Onboarding</td><td>UI Onboarding</td><td><span class="tag tag-p0">P0</span></td></tr>
+    <tr><td>Git repo correct structure</td><td>Onboarding</td><td>Validate Artifacts</td><td><span class="tag tag-p0">P0</span></td></tr>
+    <tr><td>All Harness pipelines + triggers</td><td>Onboarding</td><td>Validate Artifacts</td><td><span class="tag tag-p0">P0</span></td></tr>
+    <tr><td>All AWS resources created</td><td>Onboarding</td><td>Validate Artifacts</td><td><span class="tag tag-p0">P0</span></td></tr>
+    <tr><td>Hello-world deploys DEV &amp; TEST</td><td>Onboarding</td><td>Deploy DEV/TEST</td><td><span class="tag tag-p0">P0</span></td></tr>
+    <tr><td>Code push triggers pipeline</td><td>Onboarding</td><td>Deploy DEV/TEST</td><td><span class="tag tag-p0">P0</span></td></tr>
+    <tr><td>Release STG succeeds</td><td>Onboarding</td><td>Release STG</td><td><span class="tag tag-p0">P0</span></td></tr>
+    <tr><td>Release PROD succeeds</td><td>Onboarding</td><td>Release PROD</td><td><span class="tag tag-p0">P0</span></td></tr>
+    <tr><td>Cleanup idempotent</td><td>Onboarding</td><td>Setup</td><td><span class="tag tag-p1">P1</span></td></tr>
+    <tr><td>Single resource onboarding</td><td>Onboarding</td><td>UI Onboarding</td><td><span class="tag tag-p1">P1</span></td></tr>
+    <tr><td>UI error states</td><td>Onboarding</td><td>UI Onboarding</td><td><span class="tag tag-p2">P2</span></td></tr>
+    <tr><td colspan="4" class="gh">Day-2 CI/CD E2E (Pipeline 2)</td></tr>
+    <tr><td>Real app code push</td><td>Day-2</td><td>Update Code</td><td><span class="tag tag-p0">P0</span></td></tr>
+    <tr><td>PR pipeline passes</td><td>Day-2</td><td>Update Code</td><td><span class="tag tag-p0">P0</span></td></tr>
+    <tr><td>Merge triggers deploy</td><td>Day-2</td><td>Deploy DEV/TEST</td><td><span class="tag tag-p0">P0</span></td></tr>
+    <tr><td>App reads new DynamoDB</td><td>Day-2</td><td>Deploy DEV/TEST</td><td><span class="tag tag-p0">P0</span></td></tr>
+    <tr><td>/health no regression</td><td>Day-2</td><td>Deploy DEV/TEST</td><td><span class="tag tag-p0">P0</span></td></tr>
+    <tr><td>Promotes STG → PROD</td><td>Day-2</td><td>Release STG/PROD</td><td><span class="tag tag-p0">P0</span></td></tr>
+    <tr><td>Version matches commit</td><td>Day-2</td><td>Deploy DEV/TEST</td><td><span class="tag tag-p1">P1</span></td></tr>
+    <tr><td>CloudWatch no errors</td><td>Day-2</td><td>Release PROD</td><td><span class="tag tag-p1">P1</span></td></tr>
+    <tr><td colspan="4" class="gh">Future Pipelines</td></tr>
+    <tr><td>Add service to project</td><td>Add Service</td><td>—</td><td><span class="tag tag-p1">P1</span></td></tr>
+    <tr><td>Rollback failed deploy</td><td>Rollback</td><td>—</td><td><span class="tag tag-p2">P2</span></td></tr>
+  </tbody></table></div>
+</section>
+
+<!-- 11 METRICS -->
+<section id="metrics">
+  <h2 class="st"><span class="num">11</span> Success Metrics &amp; Priority Tiers</h2>
+  <p>Each metric has <span class="tag tag-h">HIGH</span> <span class="tag tag-m">MEDIUM</span> <span class="tag tag-l">LOW</span> tiers aligned with P0/P1/P2 coverage priorities.</p>
+  <div class="mg">
+    <div class="mc"><div class="ml">E2E Pass Rate (Nightly)</div><div class="mt">
+      <div class="mt-r"><span class="tag tag-h" style="min-width:44px;text-align:center">HIGH</span><div class="mt-bar" style="background:var(--green);width:100%"></div><span class="mt-v" style="color:var(--green)">100%</span></div>
+      <div class="mt-desc">All P0 + P1 pass every night</div>
+      <div class="mt-r"><span class="tag tag-m" style="min-width:44px;text-align:center">MED</span><div class="mt-bar" style="background:var(--orange);width:95%"></div><span class="mt-v" style="color:var(--orange)">≥95%</span></div>
+      <div class="mt-desc">All P0 pass, occasional P1 flake</div>
+      <div class="mt-r"><span class="tag tag-l" style="min-width:44px;text-align:center">LOW</span><div class="mt-bar" style="background:var(--red);width:90%"></div><span class="mt-v" style="color:var(--red)">≥90%</span></div>
+      <div class="mt-desc">P0 pass, some P1/P2 tolerated</div>
+    </div></div>
+    <div class="mc"><div class="ml">Full Suite Execution Time</div><div class="mt">
+      <div class="mt-r"><span class="tag tag-h" style="min-width:44px;text-align:center">HIGH</span><div class="mt-bar" style="background:var(--green);width:60%"></div><span class="mt-v" style="color:var(--green)">≤20m</span></div>
+      <div class="mt-desc">Fast feedback, parallel stages</div>
+      <div class="mt-r"><span class="tag tag-m" style="min-width:44px;text-align:center">MED</span><div class="mt-bar" style="background:var(--orange);width:80%"></div><span class="mt-v" style="color:var(--orange)">≤30m</span></div>
+      <div class="mt-desc">Acceptable for nightly</div>
+      <div class="mt-r"><span class="tag tag-l" style="min-width:44px;text-align:center">LOW</span><div class="mt-bar" style="background:var(--red);width:100%"></div><span class="mt-v" style="color:var(--red)">≤45m</span></div>
+      <div class="mt-desc">Needs optimization</div>
+    </div></div>
+    <div class="mc"><div class="ml">P0 Scenario Coverage</div><div class="mt">
+      <div class="mt-r"><span class="tag tag-h" style="min-width:44px;text-align:center">HIGH</span><div class="mt-bar" style="background:var(--green);width:100%"></div><span class="mt-v" style="color:var(--green)">100%</span></div>
+      <div class="mt-desc">Every P0 automated and passing</div>
+      <div class="mt-r"><span class="tag tag-m" style="min-width:44px;text-align:center">MED</span><div class="mt-bar" style="background:var(--orange);width:85%"></div><span class="mt-v" style="color:var(--orange)">≥85%</span></div>
+      <div class="mt-desc">Most P0 automated</div>
+      <div class="mt-r"><span class="tag tag-l" style="min-width:44px;text-align:center">LOW</span><div class="mt-bar" style="background:var(--red);width:70%"></div><span class="mt-v" style="color:var(--red)">≥70%</span></div>
+      <div class="mt-desc">Core flows covered</div>
+    </div></div>
+    <div class="mc"><div class="ml">Flake Rate</div><div class="mt">
+      <div class="mt-r"><span class="tag tag-h" style="min-width:44px;text-align:center">HIGH</span><div class="mt-bar" style="background:var(--green);width:20%"></div><span class="mt-v" style="color:var(--green)">≤2%</span></div>
+      <div class="mt-desc">Near-zero, high confidence</div>
+      <div class="mt-r"><span class="tag tag-m" style="min-width:44px;text-align:center">MED</span><div class="mt-bar" style="background:var(--orange);width:50%"></div><span class="mt-v" style="color:var(--orange)">≤5%</span></div>
+      <div class="mt-desc">Manageable, tracked</div>
+      <div class="mt-r"><span class="tag tag-l" style="min-width:44px;text-align:center">LOW</span><div class="mt-bar" style="background:var(--red);width:80%"></div><span class="mt-v" style="color:var(--red)">≤10%</span></div>
+      <div class="mt-desc">Tolerable early on</div>
+    </div></div>
+    <div class="mc"><div class="ml">Regression Detection Time</div><div class="mt">
+      <div class="mt-r"><span class="tag tag-h" style="min-width:44px;text-align:center">HIGH</span><div class="mt-bar" style="background:var(--green);width:30%"></div><span class="mt-v" style="color:var(--green)">≤4h</span></div>
+      <div class="mt-desc">On-merge trigger</div>
+      <div class="mt-r"><span class="tag tag-m" style="min-width:44px;text-align:center">MED</span><div class="mt-bar" style="background:var(--orange);width:70%"></div><span class="mt-v" style="color:var(--orange)">≤24h</span></div>
+      <div class="mt-desc">Nightly catches next-day</div>
+      <div class="mt-r"><span class="tag tag-l" style="min-width:44px;text-align:center">LOW</span><div class="mt-bar" style="background:var(--red);width:100%"></div><span class="mt-v" style="color:var(--red)">≤48h</span></div>
+      <div class="mt-desc">Acceptable during ramp-up</div>
+    </div></div>
+    <div class="mc"><div class="ml">Pipeline Infra Reliability</div><div class="mt">
+      <div class="mt-r"><span class="tag tag-h" style="min-width:44px;text-align:center">HIGH</span><div class="mt-bar" style="background:var(--green);width:100%"></div><span class="mt-v" style="color:var(--green)">≥99%</span></div>
+      <div class="mt-desc">Infra never the bottleneck</div>
+      <div class="mt-r"><span class="tag tag-m" style="min-width:44px;text-align:center">MED</span><div class="mt-bar" style="background:var(--orange);width:95%"></div><span class="mt-v" style="color:var(--orange)">≥95%</span></div>
+      <div class="mt-desc">Rare issues, auto-retries</div>
+      <div class="mt-r"><span class="tag tag-l" style="min-width:44px;text-align:center">LOW</span><div class="mt-bar" style="background:var(--red);width:90%"></div><span class="mt-v" style="color:var(--red)">≥90%</span></div>
+      <div class="mt-desc">Some docker/delegate issues</div>
+    </div></div>
+  </div>
+</section>
+
+<!-- 12 TOOLS -->
+<section id="tools">
+  <h2 class="st"><span class="num">12</span> Tooling &amp; Schedule</h2>
+  <div class="tw"><table><thead><tr><th>Tool</th><th>Purpose</th></tr></thead><tbody>
+    <tr><td><strong>Harness</strong></td><td>Orchestrator + child pipelines + pipeline-under-test verification</td></tr>
+    <tr><td><strong>Playwright</strong></td><td>UI automation, screenshots</td></tr>
+    <tr><td><strong>Python</strong></td><td>API validation (requests), AWS (boto3), Git ops, polling</td></tr>
+    <tr><td><strong>Docker</strong></td><td>Two images: e2e-playwright, e2e-python</td></tr>
+    <tr><td><strong>Slack</strong></td><td>Pass/fail notifications</td></tr>
+  </tbody></table></div>
+  <div class="tw"><table><thead><tr><th>Trigger</th><th>When</th><th>What Runs</th></tr></thead><tbody>
+    <tr><td>Nightly</td><td>2 AM UTC daily</td><td>Full orchestrator — all pipelines</td></tr>
+    <tr><td>Platform release</td><td>Merge to main</td><td>Onboarding E2E only</td></tr>
+    <tr><td>Pipeline change</td><td>Relevant merge</td><td>Day-2 CI/CD only</td></tr>
+    <tr><td>Manual</td><td>On-demand</td><td>Selective via input sets</td></tr>
+    <tr><td>Weekly full</td><td>Sunday 6 AM UTC</td><td>All + edge cases</td></tr>
+  </tbody></table></div>
+</section>
+
+<!-- 13 ROADMAP -->
+<section id="roadmap">
+  <h2 class="st"><span class="num">13</span> Implementation Roadmap</h2>
+  <div class="tl-wrap">
+    <div class="tl-item"><div class="ph">PHASE 1 — FOUNDATION</div><div class="pt">Cleanup, API Onboarding, Provisioning Poll</div><div class="pd">Build Setup stage, cleanup scripts (Git, AWS, Platform API), provisioning poller. Establish the two Docker images.</div></div>
+    <div class="tl-item"><div class="ph">PHASE 2 — ARTIFACT VERIFICATION</div><div class="pt">Git Repo, Pipelines, AWS Resource Validation</div><div class="pd">Build Validate Artifacts stage. Python scripts for repo structure, Harness pipeline checks, boto3 resource verification.</div></div>
+    <div class="tl-item"><div class="ph">PHASE 3 — DEPLOYMENT VALIDATION</div><div class="pt">Deploy to DEV/TEST, Health Checks</div><div class="pd">Build Deploy stage. Trigger pipelines via Harness API, poll completion, validate hello-world across environments.</div></div>
+    <div class="tl-item"><div class="ph">PHASE 4 — RELEASE VALIDATION</div><div class="pt">Release to STG &amp; PROD, Approval Gates</div><div class="pd">Build Release stages. Complete Pipeline 1 (Onboarding E2E). Auto-approve gates, multi-env health checks.</div></div>
+    <div class="tl-item"><div class="ph">PHASE 5 — DAY-2 CI/CD PIPELINE</div><div class="pt">Code Push, PR/Merge, Full CI/CD Loop</div><div class="pd">Build Pipeline 2. Git operations, PR creation/merge, validate triggers and full deployment cycle.</div></div>
+    <div class="tl-item"><div class="ph">PHASE 6 — UI AUTOMATION</div><div class="pt">Playwright Onboarding + Release Flows</div><div class="pd">Implement Playwright tests for onboarding form, release UI, add-service flow. Screenshots, error states.</div></div>
+    <div class="tl-item"><div class="ph">PHASE 7 — ORCHESTRATOR &amp; REPORTING</div><div class="pt">Meta Pipeline, Reports, Notifications</div><div class="pd">Build orchestrator with configurable input sets. HTML reports, Slack alerts, retry logic, flake elimination.</div></div>
+  </div>
+</section>
+
+</div><!-- content -->
+</div><!-- main -->
+<footer style="margin-left:var(--sw)"><p>E2E Testing Strategy — Developer Platform · Confidential</p></footer>
+</body>
+</html>
